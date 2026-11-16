@@ -1,0 +1,31 @@
+{
+  "name": "soulom",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Soulom — a private, client-side AI companion PWA that listens.",
+  "license": "MIT",
+  "scripts": {
+    "dev": "vite",
+    "dev:api": "wrangler pages dev dist --port 8788 --kv SOULOM_KV",
+    "build": "tsc -p tsconfig.app.json && tsc -p functions/tsconfig.json && vite build",
+    "preview": "vite preview",
+    "pages:preview": "npm run build && wrangler pages dev dist --kv SOULOM_KV",
+    "icons": "node scripts/generate-icons.mjs"
+  },
+  "dependencies": {
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261116.1",
+    "@tailwindcss/vite": "^4.3.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.3.0",
+    "tailwindcss": "^4.3.5",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.8",
+    "wrangler": "^4.163.0"
+  }
+}

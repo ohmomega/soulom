@@ -1,0 +1,79 @@
+@import "tailwindcss";
+
+@theme {
+  --color-night: #121214;
+  --color-ink: #19191c;
+  --color-ink-raised: #212125;
+  --color-line: #2b2b30;
+  --color-line-strong: #3a3a40;
+  --color-cream: #e4e4e7;
+  --color-cream-soft: #c4c4c8;
+  --color-muted: #8d8d94;
+  --color-ember: #d4a373;
+  --color-ember-deep: #b8875a;
+  --color-sage: #9db49a;
+  --color-clay: #c98b7f;
+
+  --font-sans: "IBM Plex Sans Thai", "Noto Sans Thai", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --animate-settle: settle 220ms ease-out both;
+  --animate-fade: fade 200ms ease-out both;
+  --animate-breathe: breathe 1.4s ease-in-out infinite;
+
+  @keyframes settle {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes breathe {
+    0%, 100% { opacity: 0.25; }
+    50% { opacity: 0.9; }
+  }
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    background-color: var(--color-night);
+    color: var(--color-cream);
+    font-family: var(--font-sans);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior: none;
+  }
+
+  ::selection {
+    background-color: color-mix(in srgb, var(--color-ember) 35%, transparent);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-ember);
+    outline-offset: 2px;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
