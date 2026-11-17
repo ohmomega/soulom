@@ -1,0 +1,10 @@
+name = "soulom"
+pages_build_output_dir = "dist"
+compatibility_date = "2026-11-01"
+
+[vars]
+FREE_DAILY_MESSAGE_LIMIT = "20"
+
+[[kv_namespaces]]
+binding = "SOULOM_KV"
+id = "7f4a69aa5dec409c9fd3e6a6d8941630"

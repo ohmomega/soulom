@@ -4,6 +4,7 @@ import {
   generateGeminiReply,
   GeminiRequestError,
   prepareTurnsForGemini,
+  resolveGeminiModels,
   type ConversationTurn,
 } from "../../server/geminiClient";
 import { fingerprintClient, isPlainObject, jsonResponse, readJsonBody } from "../../server/http";
@@ -107,8 +108,14 @@ export const onRequestPost: PagesFunction<SoulomEnv> = async ({ request, env }) 
 
   let reply: string;
   try {
-    reply = await generateGeminiReply({ apiKey: env.GEMINI_API_KEY, ...generation });
+    reply = await generateGeminiReply({
+      apiKey: env.GEMINI_API_KEY.trim(), // trim() also strips a stray BOM (U+FEFF)
+      models: resolveGeminiModels(env.GEMINI_MODEL),
+      ...generation,
+    });
   } catch (error) {
+    // Logs only the model name and status, never conversation text.
+    console.warn("gemini_failed", error instanceof Error ? error.message : "unknown");
     if (error instanceof GeminiRequestError && error.kind === "blocked") {
       return jsonResponse({ error: "reply_blocked" }, 422);
     }

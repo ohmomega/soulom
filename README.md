@@ -20,7 +20,7 @@
 └───────────────┬───────────────────────────────────┘
                 │ /api/*
 ┌───────────────▼── Cloudflare Pages Functions ─────┐
-│ /api/chat         persona + โควตา → Gemini 2.5 Flash│
+│ /api/chat         persona + โควตา → Gemini Flash-Lite│
 │ /api/license      ตรวจรหัสปลดล็อก                  │
 │ /api/verify-slip  ตรวจสลิปพร้อมเพย์ → ออกรหัส 30 วัน │
 │                                                   │
@@ -98,7 +98,8 @@ npm run dev                         # หน้าเว็บ Vite ที่ :5
 
 | ตัวแปร | ฝั่ง | ใช้ทำอะไร |
 | --- | --- | --- |
-| `GEMINI_API_KEY` | Functions | คีย์ Google AI Studio (โมเดล `gemini-2.5-flash`) |
+| `GEMINI_API_KEY` | Functions | คีย์ Google AI Studio |
+| `GEMINI_MODEL` | Functions | (ไม่บังคับ) ชื่อโมเดล คั่นด้วย `,` เพื่อสำรอง ค่าเริ่มต้น `gemini-3.5-flash-lite,gemini-3.1-flash-lite` |
 | `SOULOM_KV` | Binding | โควตา, รหัส SOULOM-TH, สลิปที่ใช้แล้ว |
 | `FREE_DAILY_MESSAGE_LIMIT` | Functions | ข้อความฟรีต่อวันต่อ IP (ค่าเริ่มต้น 20) |
 | `LEMON_SQUEEZY_API_KEY` | Functions | เปิดการตรวจ License Key จาก Lemon Squeezy |

@@ -1,5 +1,6 @@
 export interface SoulomEnv {
   GEMINI_API_KEY?: string;
+  GEMINI_MODEL?: string;
   SOULOM_KV?: KVNamespace;
   FREE_DAILY_MESSAGE_LIMIT?: string;
   LEMON_SQUEEZY_API_KEY?: string;
