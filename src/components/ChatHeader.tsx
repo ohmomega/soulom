@@ -2,17 +2,30 @@ import { HeartIcon, KeepsakeIcon, MoonMark } from "./icons";
 
 interface ChatHeaderProps {
   isSupporter: boolean;
+  personaName: string;
+  onOpenPersona: () => void;
   onOpenKeepsake: () => void;
   onOpenSupporter: () => void;
 }
 
-export function ChatHeader({ isSupporter, onOpenKeepsake, onOpenSupporter }: ChatHeaderProps) {
+export function ChatHeader({ isSupporter, personaName, onOpenPersona, onOpenKeepsake, onOpenSupporter }: ChatHeaderProps) {
   return (
     <header className="sticky top-0 z-20 border-b border-line/70 bg-night/95 pt-[env(safe-area-inset-top)]">
-      <div className="mx-auto flex h-14 max-w-2xl items-center justify-between px-4">
-        <div className="flex items-center gap-2.5 text-cream">
+      <div className="mx-auto flex h-14 max-w-2xl items-center justify-between gap-2 px-4">
+        <div className="flex min-w-0 items-center gap-2.5 text-cream">
           <MoonMark />
           <span className="text-[17px] font-semibold tracking-wide">Soulom</span>
+          <button
+            type="button"
+            onClick={onOpenPersona}
+            className="flex min-w-0 items-center gap-1 rounded-full border border-line px-2.5 py-1 text-xs text-cream-soft transition-colors hover:border-line-strong hover:text-cream"
+            aria-label={`บุคลิก: ${personaName} (กดเพื่อเปลี่ยน)`}
+          >
+            <span className="truncate">{personaName}</span>
+            <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true" className="shrink-0 opacity-70">
+              <path d="M2 3.5 5 6.5 8 3.5" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+            </svg>
+          </button>
         </div>
         <div className="flex items-center gap-1">
           <button

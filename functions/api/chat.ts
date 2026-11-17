@@ -12,9 +12,12 @@ import { resolveStore } from "../../server/keyValueStore";
 import { verifyLicenseKey, type LicenseVerdict } from "../../server/license";
 import {
   buildCompanionInstruction,
+  DEFAULT_PERSONA,
+  isPersonaId,
   buildMemoryNoteRequest,
   MAX_MEMORY_NOTE_LENGTH,
   tidyMemoryNote,
+  type PersonaId,
 } from "../../server/soulomPersona";
 
 const SLIDING_WINDOW_SIZE = 20;
@@ -29,6 +32,7 @@ interface ChatRequest {
   mode: ChatMode;
   turns: ConversationTurn[];
   memoryNote: string;
+  persona: PersonaId;
 }
 
 function parseChatRequest(body: unknown): ChatRequest | null {
@@ -36,6 +40,7 @@ function parseChatRequest(body: unknown): ChatRequest | null {
 
   const mode: ChatMode = body.mode === "memory-note" ? "memory-note" : "chat";
   const memoryNote = typeof body.memoryNote === "string" ? body.memoryNote.slice(0, MAX_MEMORY_NOTE_LENGTH) : "";
+  const persona = isPersonaId(body.persona) ? body.persona : DEFAULT_PERSONA;
 
   const turns: ConversationTurn[] = [];
   for (const candidate of body.messages.slice(-SLIDING_WINDOW_SIZE)) {
@@ -51,7 +56,7 @@ function parseChatRequest(body: unknown): ChatRequest | null {
   if (preparedTurns.length === 0) return null;
   if (mode === "chat" && preparedTurns.at(-1)?.role !== "user") return null;
 
-  return { mode, turns: preparedTurns, memoryNote };
+  return { mode, turns: preparedTurns, memoryNote, persona };
 }
 
 function describeSupporter(verdict: LicenseVerdict | null) {
@@ -95,7 +100,7 @@ export const onRequestPost: PagesFunction<SoulomEnv> = async ({ request, env }) 
   const generation =
     chatRequest.mode === "chat"
       ? {
-          systemInstruction: buildCompanionInstruction(chatRequest.memoryNote),
+          systemInstruction: buildCompanionInstruction(chatRequest.memoryNote, chatRequest.persona),
           turns: chatRequest.turns,
           temperature: 0.85,
           maxOutputTokens: 1024,

@@ -1,9 +1,11 @@
 import { useEffect, useRef } from "react";
 import type { ChatNotice } from "../hooks/useChatSession";
 import type { ChatMessage } from "../types/chat";
+import type { PersonaOption } from "../config/personas";
 
 interface MessageListProps {
   messages: ChatMessage[];
+  persona: PersonaOption;
   isAwaitingReply: boolean;
   notice: ChatNotice | null;
   onRetry: () => void;
@@ -30,7 +32,7 @@ function MessageBubble({ message }: { message: ChatMessage }) {
   return <p className="max-w-[92%] break-words whitespace-pre-wrap text-cream-soft">{message.text}</p>;
 }
 
-function NoticeCard({ notice, onRetry, onOpenSupporter }: Omit<MessageListProps, "messages" | "isAwaitingReply"> & { notice: ChatNotice }) {
+function NoticeCard({ notice, onRetry, onOpenSupporter }: Omit<MessageListProps, "messages" | "isAwaitingReply" | "persona"> & { notice: ChatNotice }) {
   if (notice.kind === "quota-exceeded") {
     return (
       <div className="animate-settle rounded-2xl border border-line bg-ink px-4 py-3.5 text-sm text-cream-soft">
@@ -63,7 +65,7 @@ function NoticeCard({ notice, onRetry, onOpenSupporter }: Omit<MessageListProps,
   );
 }
 
-export function MessageList({ messages, isAwaitingReply, notice, onRetry, onOpenSupporter }: MessageListProps) {
+export function MessageList({ messages, persona, isAwaitingReply, notice, onRetry, onOpenSupporter }: MessageListProps) {
   const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -74,9 +76,9 @@ export function MessageList({ messages, isAwaitingReply, notice, onRetry, onOpen
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-5 px-4 py-6" aria-live="polite">
       {messages.length === 0 && (
         <div className="mt-[18dvh] animate-fade text-center">
-          <p className="text-lg text-cream">คืนนี้เป็นยังไงบ้าง</p>
+          <p className="text-lg text-cream">{persona.greeting}</p>
           <p className="mt-2 text-sm leading-relaxed text-muted">
-            เล่าอะไรก็ได้ เรื่องเล็กเรื่องใหญ่ เราฟังอยู่
+            {persona.listening}
             <br />
             ทุกอย่างที่คุยเก็บไว้ในเครื่องนี้เท่านั้น
           </p>

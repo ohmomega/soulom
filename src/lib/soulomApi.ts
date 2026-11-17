@@ -1,4 +1,5 @@
 import type { ChatMessage, QuotaStatus } from "../types/chat";
+import type { PersonaId } from "../config/personas";
 import { isRecord } from "./schema";
 
 export const SLIDING_WINDOW_SIZE = 20;
@@ -54,12 +55,13 @@ async function postJson(path: string, body: unknown, licenseKey: string | null, 
 export async function requestCompanionReply(
   messages: ChatMessage[],
   memoryNote: string,
+  persona: PersonaId,
   licenseKey: string | null,
   signal?: AbortSignal,
 ): Promise<ReplyOutcome> {
   let result: Awaited<ReturnType<typeof postJson>>;
   try {
-    result = await postJson("/api/chat", { mode: "chat", messages: toApiTurns(messages), memoryNote }, licenseKey, signal);
+    result = await postJson("/api/chat", { mode: "chat", messages: toApiTurns(messages), memoryNote, persona }, licenseKey, signal);
   } catch {
     return { kind: "failed", reason: "offline" };
   }

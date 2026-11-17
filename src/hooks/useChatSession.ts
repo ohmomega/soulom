@@ -3,6 +3,7 @@ import { containsSelfHarmSignal } from "../lib/crisisDetector";
 import { localVault } from "../lib/localVault";
 import { requestCompanionReply, requestMemoryNote, type SupporterState } from "../lib/soulomApi";
 import type { ChatMessage, ChatRole, QuotaStatus } from "../types/chat";
+import type { PersonaId } from "../config/personas";
 
 const MEMORY_NOTE_INTERVAL = 10;
 const MAX_DRAFT_LENGTH = 4000;
@@ -24,14 +25,15 @@ function createMessage(role: ChatRole, text: string): ChatMessage {
 export function useChatSession({ licenseKey, onSupporterState }: ChatSessionOptions) {
   const [messages, setMessages] = useState<ChatMessage[]>(() => localVault.loadMessages());
   const [memoryNote, setMemoryNote] = useState<string>(() => localVault.loadMemoryNote());
+  const [persona, setPersonaState] = useState<PersonaId>(() => localVault.loadPersona());
   const [isAwaitingReply, setIsAwaitingReply] = useState(false);
   const [notice, setNotice] = useState<ChatNotice | null>(null);
   const [quota, setQuota] = useState<QuotaStatus | null>(null);
   const [isCrisisBannerVisible, setIsCrisisBannerVisible] = useState(false);
 
   const memoryNoteInFlight = useRef(false);
-  const latestState = useRef({ licenseKey, memoryNote, onSupporterState });
-  latestState.current = { licenseKey, memoryNote, onSupporterState };
+  const latestState = useRef({ licenseKey, memoryNote, persona, onSupporterState });
+  latestState.current = { licenseKey, memoryNote, persona, onSupporterState };
 
   useEffect(() => {
     if (!localVault.saveMessages(messages)) setNotice({ kind: "storage-full" });
@@ -58,10 +60,14 @@ export function useChatSession({ licenseKey, onSupporterState }: ChatSessionOpti
     async (conversation: ChatMessage[]) => {
       setIsAwaitingReply(true);
       setNotice(null);
-      const { licenseKey: currentLicense, memoryNote: currentNote, onSupporterState: reportSupporter } =
-        latestState.current;
+      const {
+        licenseKey: currentLicense,
+        memoryNote: currentNote,
+        persona: currentPersona,
+        onSupporterState: reportSupporter,
+      } = latestState.current;
 
-      const outcome = await requestCompanionReply(conversation, currentNote, currentLicense);
+      const outcome = await requestCompanionReply(conversation, currentNote, currentPersona, currentLicense);
       setIsAwaitingReply(false);
 
       if (outcome.kind === "reply") {
@@ -112,6 +118,11 @@ export function useChatSession({ licenseKey, onSupporterState }: ChatSessionOpti
     setNotice(null);
   }, []);
 
+  const setPersona = useCallback((next: PersonaId) => {
+    localVault.savePersona(next);
+    setPersonaState(next);
+  }, []);
+
   const eraseConversation = useCallback(() => {
     localVault.clearConversation();
     setMemoryNote("");
@@ -123,6 +134,8 @@ export function useChatSession({ licenseKey, onSupporterState }: ChatSessionOpti
   return {
     messages,
     memoryNote,
+    persona,
+    setPersona,
     isAwaitingReply,
     notice,
     quota,

@@ -1,11 +1,13 @@
 import type { ChatMessage, StoredLicense } from "../types/chat";
 import { isChatMessageList, isMemoryNote, isRecord, isValidLicenseKey } from "./schema";
+import { DEFAULT_PERSONA, isPersonaId, type PersonaId } from "../config/personas";
 
 const STORAGE_KEYS = {
   messages: "soulom.messages.v1",
   memoryNote: "soulom.memoryNote.v1",
   memoryNoteCursor: "soulom.memoryNoteCursor.v1",
   license: "soulom.license.v1",
+  persona: "soulom.persona.v1",
 } as const;
 
 function readRaw(key: string): string | null {
@@ -69,6 +71,14 @@ export const localVault = {
   },
   saveLicense(license: StoredLicense | null): void {
     writeRaw(STORAGE_KEYS.license, license ? JSON.stringify(license) : null);
+  },
+
+  loadPersona(): PersonaId {
+    const stored = readRaw(STORAGE_KEYS.persona);
+    return isPersonaId(stored) ? stored : DEFAULT_PERSONA;
+  },
+  savePersona(persona: PersonaId): void {
+    writeRaw(STORAGE_KEYS.persona, persona);
   },
 
   clearConversation(): void {
