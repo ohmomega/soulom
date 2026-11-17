@@ -13,5 +13,5 @@
     "noEmit": true,
     "types": ["@cloudflare/workers-types"]
   },
-  "include": ["./**/*.ts", "../server/**/*.ts"]
+  "include": ["./**/*.ts", "../server/**/*.ts", "../shared/**/*.ts"]
 }

@@ -1,3 +1,4 @@
+import type { PersonaId } from "../../config/personas";
 import { useState, type FormEvent } from "react";
 import {
   buildSoulomFileName,
@@ -15,11 +16,12 @@ interface ExportMemorySectionProps {
   messages: ChatMessage[];
   memoryNote: string;
   licenseKey: string | null;
+  persona: PersonaId;
 }
 
 type ExportMode = "quick" | "vault";
 
-export function ExportMemorySection({ messages, memoryNote, licenseKey }: ExportMemorySectionProps) {
+export function ExportMemorySection({ messages, memoryNote, licenseKey, persona }: ExportMemorySectionProps) {
   const [mode, setMode] = useState<ExportMode>("quick");
   const [password, setPassword] = useState("");
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
@@ -41,7 +43,13 @@ export function ExportMemorySection({ messages, memoryNote, licenseKey }: Export
     event.preventDefault();
     if (isEmpty || passwordProblem) return;
 
-    const snapshot: MemorySnapshot = { exportedAt: new Date().toISOString(), messages, memoryNote, licenseKey };
+    const snapshot: MemorySnapshot = {
+      exportedAt: new Date().toISOString(),
+      messages,
+      memoryNote,
+      licenseKey,
+      persona,
+    };
     setIsWorking(true);
     setStatus(null);
     try {

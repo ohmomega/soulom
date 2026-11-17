@@ -5,8 +5,8 @@ import { CrisisBanner } from "./components/CrisisBanner";
 import { KeepsakeModal } from "./components/memory/KeepsakeModal";
 import { MessageList } from "./components/MessageList";
 import { PersonaModal } from "./components/PersonaModal";
-import { personaById } from "./config/personas";
 import { SupporterModal } from "./components/supporter/SupporterModal";
+import { personaById } from "./config/personas";
 import { useChatSession } from "./hooks/useChatSession";
 import { useSupporterLicense } from "./hooks/useSupporterLicense";
 import type { SupporterState } from "./lib/soulomApi";
@@ -27,11 +27,18 @@ export function App() {
   );
 
   const activeLicenseKey = supporter.health === "rejected" ? null : (supporter.license?.key ?? null);
-  const session = useChatSession({ licenseKey: activeLicenseKey, onSupporterState: handleSupporterState });
+  const session = useChatSession({
+    licenseKey: activeLicenseKey,
+    isSupporter: supporter.health === "active",
+    onSupporterState: handleSupporterState,
+  });
 
   const persona = personaById(session.persona);
+  const isSoulomTyping = session.isAwaitingReply || session.isNudging;
 
   const openSupporter = useCallback(() => setOpenPanel("supporter"), []);
+  const openPersona = useCallback(() => setOpenPanel("persona"), []);
+  const openKeepsake = useCallback(() => setOpenPanel("keepsake"), []);
   const closePanel = useCallback(() => setOpenPanel(null), []);
 
   return (
@@ -39,8 +46,9 @@ export function App() {
       <ChatHeader
         isSupporter={supporter.health === "active"}
         personaName={persona.name}
-        onOpenPersona={() => setOpenPanel("persona")}
-        onOpenKeepsake={() => setOpenPanel("keepsake")}
+        isPersonaLocked={isSoulomTyping}
+        onOpenPersona={openPersona}
+        onOpenKeepsake={openKeepsake}
         onOpenSupporter={openSupporter}
       />
 
@@ -50,18 +58,29 @@ export function App() {
         <MessageList
           messages={session.messages}
           persona={persona}
-          isAwaitingReply={session.isAwaitingReply}
+          isAwaitingReply={isSoulomTyping}
           notice={session.notice}
           onRetry={session.retryLastReply}
           onOpenSupporter={openSupporter}
         />
       </main>
 
-      <Composer disabled={session.isAwaitingReply} quota={session.quota} onSend={session.sendMessage} />
+      <Composer
+        disabled={session.isAwaitingReply}
+        quota={session.quota}
+        onSend={session.sendMessage}
+        onDraftChange={session.noteDraft}
+      />
 
       {openPanel === "supporter" && <SupporterModal supporter={supporter} onClose={closePanel} />}
       {openPanel === "persona" && (
-        <PersonaModal current={session.persona} onSelect={session.setPersona} onClose={closePanel} />
+        <PersonaModal
+          current={session.persona}
+          nudgesEnabled={session.nudgesEnabled}
+          onSelect={session.setPersona}
+          onToggleNudges={session.setNudgesEnabled}
+          onClose={closePanel}
+        />
       )}
       {openPanel === "keepsake" && <KeepsakeModal session={session} supporter={supporter} onClose={closePanel} />}
     </div>

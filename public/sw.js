@@ -1,4 +1,5 @@
-const CACHE_NAME = "soulom-shell-v1";
+// v2 also clears the old v1 cache, which kept every past build's JS/CSS forever.
+const CACHE_NAME = "soulom-shell-v2";
 const SHELL_ASSETS = [
   "/",
   "/manifest.json",
@@ -33,12 +34,35 @@ async function networkFirst(request) {
   }
 }
 
+// Build files are named like /assets/index-<hash>.js. Keep one version per name so the cache never grows.
+function assetFamily(pathname) {
+  const match = pathname.match(/^\/assets\/(.+?)-[A-Za-z0-9_-]{6,}(\.[a-z0-9]+)$/);
+  return match ? `${match[1]}${match[2]}` : null;
+}
+
+async function dropOlderVersions(cache, pathname) {
+  const family = assetFamily(pathname);
+  if (!family) return;
+  const keys = await cache.keys();
+  await Promise.all(
+    keys
+      .filter((key) => {
+        const keyPath = new URL(key.url).pathname;
+        return keyPath !== pathname && assetFamily(keyPath) === family;
+      })
+      .map((key) => cache.delete(key)),
+  );
+}
+
 async function cacheFirst(request) {
   const cache = await caches.open(CACHE_NAME);
   const cached = await cache.match(request);
   if (cached) return cached;
   const response = await fetch(request);
-  if (response.ok) cache.put(request, response.clone());
+  if (response.ok) {
+    await cache.put(request, response.clone());
+    await dropOlderVersions(cache, new URL(request.url).pathname);
+  }
   return response;
 }
 

@@ -13,7 +13,9 @@ export function EraseMemorySection({ hasConversation, onErase }: { hasConversati
       </h3>
       {isConfirming ? (
         <div className="mt-3 space-y-2.5">
-          <p className="text-sm text-cream-soft">บทสนทนาและโน้ตความจำจะหายไปถาวร ถ้ายังไม่ได้เก็บไฟล์ไว้ จะกู้คืนไม่ได้</p>
+          <p className="text-sm text-cream-soft">
+            บทสนทนา โน้ตความจำ และบุคลิกที่เลือกไว้จะหายไปถาวร ถ้ายังไม่ได้เก็บไฟล์ไว้ จะกู้คืนไม่ได้
+          </p>
           <div className="flex gap-2">
             <Button onClick={() => setIsConfirming(false)}>ยังก่อน</Button>
             <Button

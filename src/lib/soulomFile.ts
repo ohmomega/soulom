@@ -1,3 +1,4 @@
+import { isPersonaId, type PersonaId } from "../config/personas";
 import type { ChatMessage } from "../types/chat";
 import { hasExactKeys, isChatMessageList, isMemoryNote, isRecord, isValidLicenseKey } from "./schema";
 
@@ -14,6 +15,8 @@ export interface MemorySnapshot {
   messages: ChatMessage[];
   memoryNote: string;
   licenseKey: string | null;
+  /** Absent in files saved before personas existed. */
+  persona: PersonaId | null;
 }
 
 interface QuickSaveEnvelope {
@@ -160,7 +163,11 @@ export function parseEnvelope(fileText: string): SoulomEnvelope {
 function validateSnapshot(candidate: unknown): MemorySnapshot {
   if (
     !isRecord(candidate) ||
-    !hasExactKeys(candidate, ["exportedAt", "messages", "memoryNote", "licenseKey"]) ||
+    !(
+      hasExactKeys(candidate, ["exportedAt", "messages", "memoryNote", "licenseKey"]) ||
+      (hasExactKeys(candidate, ["exportedAt", "messages", "memoryNote", "licenseKey", "persona"]) &&
+        isPersonaId(candidate.persona))
+    ) ||
     typeof candidate.exportedAt !== "string" ||
     Number.isNaN(Date.parse(candidate.exportedAt)) ||
     !isChatMessageList(candidate.messages) ||
@@ -181,6 +188,7 @@ function validateSnapshot(candidate: unknown): MemorySnapshot {
     messages: candidate.messages.map(({ id, role, text, createdAt }) => ({ id, role, text, createdAt })),
     memoryNote: candidate.memoryNote,
     licenseKey: candidate.licenseKey,
+    persona: isPersonaId(candidate.persona) ? candidate.persona : null,
   };
 }
 

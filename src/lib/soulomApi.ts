@@ -1,5 +1,6 @@
 import type { ChatMessage, QuotaStatus } from "../types/chat";
 import type { PersonaId } from "../config/personas";
+import type { NudgeKind } from "../../shared/personaIds";
 import { isRecord } from "./schema";
 
 export const SLIDING_WINDOW_SIZE = 20;
@@ -90,6 +91,35 @@ export async function requestMemoryNote(
       licenseKey,
     );
     return status === 200 && typeof payload.memoryNote === "string" ? payload.memoryNote : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Asks Soulom to speak first (welcome back / gentle follow-up). Returns null on any failure: nudges are optional. */
+export async function requestNudge(
+  messages: ChatMessage[],
+  memoryNote: string,
+  persona: PersonaId,
+  nudge: NudgeKind,
+  licenseKey: string | null,
+  signal?: AbortSignal,
+): Promise<string | null> {
+  try {
+    const { status, payload } = await postJson(
+      "/api/chat",
+      {
+        mode: "nudge",
+        nudge,
+        awayMinutes: Math.round((Date.now() - (messages.at(-1)?.createdAt ?? Date.now())) / 60_000),
+        messages: toApiTurns(messages),
+        memoryNote,
+        persona,
+      },
+      licenseKey,
+      signal,
+    );
+    return status === 200 && typeof payload.reply === "string" && payload.reply.trim() ? payload.reply.trim() : null;
   } catch {
     return null;
   }

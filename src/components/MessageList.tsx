@@ -1,4 +1,5 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { RENDER_PAGE_SIZE } from "../config/storageLimits";
 import type { ChatNotice } from "../hooks/useChatSession";
 import type { ChatMessage } from "../types/chat";
 import type { PersonaOption } from "../config/personas";
@@ -67,13 +68,40 @@ function NoticeCard({ notice, onRetry, onOpenSupporter }: Omit<MessageListProps,
 
 export function MessageList({ messages, persona, isAwaitingReply, notice, onRetry, onOpenSupporter }: MessageListProps) {
   const endRef = useRef<HTMLDivElement>(null);
+  // Only the newest messages are drawn, so a long history doesn't slow the phone down.
+  const [visibleCount, setVisibleCount] = useState(RENDER_PAGE_SIZE);
+  const heightBeforeExpand = useRef<number | null>(null);
+  const hiddenCount = Math.max(0, messages.length - visibleCount);
+  const visibleMessages = hiddenCount > 0 ? messages.slice(hiddenCount) : messages;
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages.length, isAwaitingReply, notice]);
 
+  // Keep the reader's place when older messages are inserted above.
+  useLayoutEffect(() => {
+    if (heightBeforeExpand.current === null) return;
+    window.scrollBy(0, document.documentElement.scrollHeight - heightBeforeExpand.current);
+    heightBeforeExpand.current = null;
+  }, [visibleCount]);
+
+  const showEarlier = () => {
+    heightBeforeExpand.current = document.documentElement.scrollHeight;
+    setVisibleCount((count) => count + RENDER_PAGE_SIZE);
+  };
+
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-5 px-4 py-6" aria-live="polite">
+      {hiddenCount > 0 && (
+        <button
+          type="button"
+          onClick={showEarlier}
+          className="self-center rounded-full border border-line px-4 py-1.5 text-xs text-muted transition-colors hover:border-line-strong hover:text-cream"
+        >
+          แสดงข้อความก่อนหน้า ({hiddenCount})
+        </button>
+      )}
+
       {messages.length === 0 && (
         <div className="mt-[18dvh] animate-fade text-center">
           <p className="text-lg text-cream">{persona.greeting}</p>
@@ -85,7 +113,7 @@ export function MessageList({ messages, persona, isAwaitingReply, notice, onRetr
         </div>
       )}
 
-      {messages.map((message) => (
+      {visibleMessages.map((message) => (
         <MessageBubble key={message.id} message={message} />
       ))}
 

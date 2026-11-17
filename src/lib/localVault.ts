@@ -8,6 +8,8 @@ const STORAGE_KEYS = {
   memoryNoteCursor: "soulom.memoryNoteCursor.v1",
   license: "soulom.license.v1",
   persona: "soulom.persona.v1",
+  nudgesEnabled: "soulom.nudges.v1",
+  lastNudgeId: "soulom.lastNudge.v1",
 } as const;
 
 function readRaw(key: string): string | null {
@@ -77,13 +79,32 @@ export const localVault = {
     const stored = readRaw(STORAGE_KEYS.persona);
     return isPersonaId(stored) ? stored : DEFAULT_PERSONA;
   },
-  savePersona(persona: PersonaId): void {
-    writeRaw(STORAGE_KEYS.persona, persona);
+  savePersona(persona: PersonaId): boolean {
+    return writeRaw(STORAGE_KEYS.persona, persona);
   },
 
+  loadNudgesEnabled(): boolean {
+    return readRaw(STORAGE_KEYS.nudgesEnabled) !== "off";
+  },
+  saveNudgesEnabled(enabled: boolean): boolean {
+    return writeRaw(STORAGE_KEYS.nudgesEnabled, enabled ? null : "off");
+  },
+
+  /** Id of the last message Soulom sent on its own, so it never nudges twice in a row. */
+  loadLastNudgeId(): string | null {
+    return readRaw(STORAGE_KEYS.lastNudgeId);
+  },
+  saveLastNudgeId(messageId: string | null): void {
+    writeRaw(STORAGE_KEYS.lastNudgeId, messageId);
+  },
+
+  /** "Start over" wipes everything tied to this person, including their chosen persona and check-in setting. */
   clearConversation(): void {
     writeRaw(STORAGE_KEYS.messages, null);
     writeRaw(STORAGE_KEYS.memoryNote, null);
     writeRaw(STORAGE_KEYS.memoryNoteCursor, null);
+    writeRaw(STORAGE_KEYS.persona, null);
+    writeRaw(STORAGE_KEYS.nudgesEnabled, null);
+    writeRaw(STORAGE_KEYS.lastNudgeId, null);
   },
 };

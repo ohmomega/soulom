@@ -19,14 +19,20 @@ export function KeepsakeModal({ session, supporter, onClose }: KeepsakeModalProp
       onClose={onClose}
     >
       <div className="space-y-6 pb-2">
+        <p className="rounded-xl bg-night/70 px-3 py-2.5 text-xs leading-relaxed text-muted">
+          เครื่องนี้เก็บแชทล่าสุดไว้ {session.messages.length.toLocaleString("th-TH")} จาก{" "}
+          {session.storedLimit.toLocaleString("th-TH")} ข้อความ ข้อความที่เก่ากว่านั้นจะถูกลบเองเพื่อไม่ให้เครื่องหนัก
+          แต่ Soulom ยังจำเรื่องสำคัญไว้ในโน้ตความจำ ถ้าอยากเก็บทั้งหมด กดเก็บเป็นไฟล์ไว้ได้
+        </p>
         <ExportMemorySection
           messages={session.messages}
           memoryNote={session.memoryNote}
           licenseKey={supporter.license?.key ?? null}
+          persona={session.persona}
         />
         <ImportMemorySection
           onRestore={(snapshot) => {
-            session.replaceConversation(snapshot.messages, snapshot.memoryNote);
+            session.replaceConversation(snapshot.messages, snapshot.memoryNote, snapshot.persona);
             if (snapshot.licenseKey) supporter.activate({ key: snapshot.licenseKey, expiresAt: null });
           }}
         />

@@ -3,12 +3,13 @@ import { HeartIcon, KeepsakeIcon, MoonMark } from "./icons";
 interface ChatHeaderProps {
   isSupporter: boolean;
   personaName: string;
+  isPersonaLocked: boolean;
   onOpenPersona: () => void;
   onOpenKeepsake: () => void;
   onOpenSupporter: () => void;
 }
 
-export function ChatHeader({ isSupporter, personaName, onOpenPersona, onOpenKeepsake, onOpenSupporter }: ChatHeaderProps) {
+export function ChatHeader({ isSupporter, personaName, isPersonaLocked, onOpenPersona, onOpenKeepsake, onOpenSupporter }: ChatHeaderProps) {
   return (
     <header className="sticky top-0 z-20 border-b border-line/70 bg-night/95 pt-[env(safe-area-inset-top)]">
       <div className="mx-auto flex h-14 max-w-2xl items-center justify-between gap-2 px-4">
@@ -18,7 +19,9 @@ export function ChatHeader({ isSupporter, personaName, onOpenPersona, onOpenKeep
           <button
             type="button"
             onClick={onOpenPersona}
-            className="flex min-w-0 items-center gap-1 rounded-full border border-line px-2.5 py-1 text-xs text-cream-soft transition-colors hover:border-line-strong hover:text-cream"
+            disabled={isPersonaLocked}
+            title={isPersonaLocked ? "รอ Soulom ตอบให้เสร็จก่อนนะ" : undefined}
+            className="flex min-w-0 items-center gap-1 rounded-full border border-line px-2.5 py-1 text-xs text-cream-soft transition-colors hover:border-line-strong hover:text-cream disabled:opacity-50"
             aria-label={`บุคลิก: ${personaName} (กดเพื่อเปลี่ยน)`}
           >
             <span className="truncate">{personaName}</span>

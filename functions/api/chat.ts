@@ -12,11 +12,14 @@ import { resolveStore } from "../../server/keyValueStore";
 import { verifyLicenseKey, type LicenseVerdict } from "../../server/license";
 import {
   buildCompanionInstruction,
-  DEFAULT_PERSONA,
-  isPersonaId,
   buildMemoryNoteRequest,
+  DEFAULT_PERSONA,
+  isNudgeKind,
+  isPersonaId,
   MAX_MEMORY_NOTE_LENGTH,
+  NUDGE_PLACEHOLDER_TURN,
   tidyMemoryNote,
+  type NudgeContext,
   type PersonaId,
 } from "../../server/soulomPersona";
 
@@ -25,20 +28,28 @@ const MAX_TURN_LENGTH = 4000;
 const MAX_REQUEST_BYTES = 160_000;
 const DEFAULT_FREE_DAILY_MESSAGES = 20;
 const FREE_DAILY_MEMORY_NOTES = 12;
+// Companion-initiated check-ins have their own small allowance so they never eat the user's chat quota.
+const FREE_DAILY_NUDGES = 6;
+const MAX_AWAY_MINUTES = 60 * 24 * 60;
 
-type ChatMode = "chat" | "memory-note";
+type ChatMode = "chat" | "memory-note" | "nudge";
 
 interface ChatRequest {
   mode: ChatMode;
   turns: ConversationTurn[];
   memoryNote: string;
   persona: PersonaId;
+  nudge?: NudgeContext;
+}
+
+function readMode(value: unknown): ChatMode {
+  return value === "memory-note" || value === "nudge" ? value : "chat";
 }
 
 function parseChatRequest(body: unknown): ChatRequest | null {
   if (!isPlainObject(body) || !Array.isArray(body.messages)) return null;
 
-  const mode: ChatMode = body.mode === "memory-note" ? "memory-note" : "chat";
+  const mode = readMode(body.mode);
   const memoryNote = typeof body.memoryNote === "string" ? body.memoryNote.slice(0, MAX_MEMORY_NOTE_LENGTH) : "";
   const persona = isPersonaId(body.persona) ? body.persona : DEFAULT_PERSONA;
 
@@ -52,6 +63,18 @@ function parseChatRequest(body: unknown): ChatRequest | null {
     turns.push({ role, text: trimmedText });
   }
 
+  if (mode === "nudge") {
+    if (!isNudgeKind(body.nudge)) return null;
+    // A check-in needs something to refer back to: earlier chat or a memory note.
+    if (turns.length === 0 && !memoryNote.trim()) return null;
+    const preparedTurns = prepareTurnsForGemini([...turns, { role: "user", text: NUDGE_PLACEHOLDER_TURN }]);
+    const awayMinutes =
+      typeof body.awayMinutes === "number" && Number.isFinite(body.awayMinutes)
+        ? Math.min(Math.max(Math.round(body.awayMinutes), 0), MAX_AWAY_MINUTES)
+        : 0;
+    return { mode, turns: preparedTurns, memoryNote, persona, nudge: { kind: body.nudge, awayMinutes } };
+  }
+
   const preparedTurns = prepareTurnsForGemini(turns);
   if (preparedTurns.length === 0) return null;
   if (mode === "chat" && preparedTurns.at(-1)?.role !== "user") return null;
@@ -63,6 +86,30 @@ function describeSupporter(verdict: LicenseVerdict | null) {
   if (!verdict) return { active: false as const };
   if (verdict.valid) return { active: true as const, expiresAt: verdict.expiresAt };
   return { active: false as const, rejectedReason: verdict.reason };
+}
+
+function quotaFor(mode: ChatMode, env: SoulomEnv): { scope: QuotaScope; limit: number } {
+  if (mode === "chat") {
+    return { scope: "chat", limit: readPositiveInteger(env.FREE_DAILY_MESSAGE_LIMIT, DEFAULT_FREE_DAILY_MESSAGES) };
+  }
+  if (mode === "nudge") return { scope: "nudge", limit: FREE_DAILY_NUDGES };
+  return { scope: "memory-note", limit: FREE_DAILY_MEMORY_NOTES };
+}
+
+function buildGeneration(chatRequest: ChatRequest) {
+  if (chatRequest.mode === "memory-note") {
+    return {
+      ...buildMemoryNoteRequest(chatRequest.memoryNote, chatRequest.turns),
+      temperature: 0.2,
+      maxOutputTokens: 512,
+    };
+  }
+  return {
+    systemInstruction: buildCompanionInstruction(chatRequest.memoryNote, chatRequest.persona, chatRequest.nudge),
+    turns: chatRequest.turns,
+    temperature: chatRequest.mode === "nudge" ? 0.9 : 0.85,
+    maxOutputTokens: chatRequest.mode === "nudge" ? 256 : 1024,
+  };
 }
 
 export const onRequestPost: PagesFunction<SoulomEnv> = async ({ request, env }) => {
@@ -80,11 +127,7 @@ export const onRequestPost: PagesFunction<SoulomEnv> = async ({ request, env }) 
   const licenseVerdict = presentedLicense ? await verifyLicenseKey(presentedLicense, env, store) : null;
   const supporter = describeSupporter(licenseVerdict);
 
-  const quotaScope: QuotaScope = chatRequest.mode === "chat" ? "chat" : "memory-note";
-  const dailyLimit =
-    chatRequest.mode === "chat"
-      ? readPositiveInteger(env.FREE_DAILY_MESSAGE_LIMIT, DEFAULT_FREE_DAILY_MESSAGES)
-      : FREE_DAILY_MEMORY_NOTES;
+  const { scope: quotaScope, limit: dailyLimit } = quotaFor(chatRequest.mode, env);
 
   let clientFingerprint: string | null = null;
   let quota: QuotaSnapshot | null = null;
@@ -97,26 +140,12 @@ export const onRequestPost: PagesFunction<SoulomEnv> = async ({ request, env }) 
     }
   }
 
-  const generation =
-    chatRequest.mode === "chat"
-      ? {
-          systemInstruction: buildCompanionInstruction(chatRequest.memoryNote, chatRequest.persona),
-          turns: chatRequest.turns,
-          temperature: 0.85,
-          maxOutputTokens: 1024,
-        }
-      : {
-          ...buildMemoryNoteRequest(chatRequest.memoryNote, chatRequest.turns),
-          temperature: 0.2,
-          maxOutputTokens: 512,
-        };
-
   let reply: string;
   try {
     reply = await generateGeminiReply({
       apiKey: env.GEMINI_API_KEY.trim(), // trim() also strips a stray BOM (U+FEFF)
       models: resolveGeminiModels(env.GEMINI_MODEL),
-      ...generation,
+      ...buildGeneration(chatRequest),
     });
   } catch (error) {
     // Logs only the model name and status, never conversation text.
@@ -131,10 +160,7 @@ export const onRequestPost: PagesFunction<SoulomEnv> = async ({ request, env }) 
     quota = await consumeDailyQuota(store, quotaScope, clientFingerprint, quota);
   }
 
-  const responseBody =
-    chatRequest.mode === "chat"
-      ? { reply, quota, supporter }
-      : { memoryNote: tidyMemoryNote(reply), supporter };
-
-  return jsonResponse(responseBody);
+  if (chatRequest.mode === "memory-note") return jsonResponse({ memoryNote: tidyMemoryNote(reply), supporter });
+  if (chatRequest.mode === "nudge") return jsonResponse({ reply, supporter });
+  return jsonResponse({ reply, quota, supporter });
 };

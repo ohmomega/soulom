@@ -6,11 +6,12 @@ interface ComposerProps {
   disabled: boolean;
   quota: QuotaStatus | null;
   onSend: (text: string) => void;
+  onDraftChange?: (draft: string) => void;
 }
 
 const MAX_TEXTAREA_HEIGHT = 160;
 
-export function Composer({ disabled, quota, onSend }: ComposerProps) {
+export function Composer({ disabled, quota, onSend, onDraftChange }: ComposerProps) {
   const [draft, setDraft] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -45,7 +46,10 @@ export function Composer({ disabled, quota, onSend }: ComposerProps) {
           id="soulom-composer"
           ref={textareaRef}
           value={draft}
-          onChange={(event) => setDraft(event.target.value)}
+          onChange={(event) => {
+            setDraft(event.target.value);
+            onDraftChange?.(event.target.value);
+          }}
           onKeyDown={handleKeyDown}
           rows={1}
           maxLength={4000}

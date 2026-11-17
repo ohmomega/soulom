@@ -3,7 +3,7 @@ import type { KeyValueStore } from "./keyValueStore";
 const BANGKOK_UTC_OFFSET_MS = 7 * 60 * 60 * 1000;
 const QUOTA_RECORD_TTL_SECONDS = 2 * 24 * 60 * 60;
 
-export type QuotaScope = "chat" | "memory-note" | "license-check" | "slip";
+export type QuotaScope = "chat" | "memory-note" | "nudge" | "license-check" | "slip";
 
 export interface QuotaSnapshot {
   limit: number;

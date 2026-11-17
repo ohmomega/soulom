@@ -1,12 +1,7 @@
+import { DEFAULT_PERSONA, type NudgeKind, type PersonaId } from "../shared/personaIds";
 import type { ConversationTurn } from "./geminiClient";
 
-export const PERSONA_IDS = ["friend", "kind", "polite"] as const;
-export type PersonaId = (typeof PERSONA_IDS)[number];
-export const DEFAULT_PERSONA: PersonaId = "friend";
-
-export function isPersonaId(value: unknown): value is PersonaId {
-  return typeof value === "string" && (PERSONA_IDS as readonly string[]).includes(value);
-}
+export { DEFAULT_PERSONA, isNudgeKind, isPersonaId, type NudgeKind, type PersonaId } from "../shared/personaIds";
 
 // Only the voice differs between personas; listening rules and safety rules are shared below.
 const PERSONA_VOICES: Record<PersonaId, string> = {
@@ -29,7 +24,7 @@ const PERSONA_VOICES: Record<PersonaId, string> = {
 const COMPANION_INSTRUCTION = `คุณคือ "Soulom" (โซลอม) เพื่อนคุยที่นั่งอยู่ข้างๆ ในคืนที่เงียบ ผู้ใช้มาหาคุณเพราะอยากมีคนฟัง ไม่ใช่เพราะอยากได้คำตอบที่ถูกต้องที่สุด
 
 วิธีคุย
-- ใช้น้ำเสียงตามบุคลิกด้านล่างเสมอ ถ้าข้อความก่อนหน้าของคุณในบทสนทนาใช้น้ำเสียงอื่น ให้เปลี่ยนมาใช้บุคลิกนี้ทันทีโดยไม่ต้องพูดถึงการเปลี่ยน
+- ใช้น้ำเสียงตามบุคลิกท้ายคำสั่งนี้เสมอ ถ้าผู้ใช้เพิ่งเปลี่ยนบุคลิก ให้เปลี่ยนทันทีโดยไม่ต้องพูดถึงการเปลี่ยน
 - ตอบสั้นเหมือนแชท 1–4 ประโยค ถ้าเขาเล่ายาวค่อยตอบยาวขึ้นได้บ้าง
 - ห้ามใช้หัวข้อ bullet ตัวเลขเรียงข้อ ตัวหนา หรือ markdown ใดๆ พิมพ์เป็นข้อความธรรมดาเท่านั้น
 - ฟังก่อนเสมอ สะท้อนสิ่งที่เขารู้สึกด้วยคำของตัวเองแบบไม่ซ้ำคำเขา แล้วค่อยถามต่อทีละคำถามเดียว
@@ -56,18 +51,54 @@ const MEMORY_NOTE_INSTRUCTION = `คุณคือผู้ช่วยจด�
 export const MAX_MEMORY_NOTE_LENGTH = 1500;
 export const MAX_MEMORY_NOTE_LINES = 8;
 
-export function buildCompanionInstruction(memoryNote: string, persona: PersonaId = DEFAULT_PERSONA): string {
-  const base = `${COMPANION_INSTRUCTION}
+function describeGap(minutes: number): string {
+  if (minutes < 120) return "ราวหนึ่งชั่วโมง";
+  if (minutes < 60 * 24) return `ราว ${Math.round(minutes / 60)} ชั่วโมง`;
+  const days = Math.round(minutes / (60 * 24));
+  return days <= 1 ? "ราวหนึ่งวัน" : `ราว ${days} วัน`;
+}
 
-${PERSONA_VOICES[persona]}`;
+function nudgeDirective(kind: NudgeKind, awayMinutes: number): string {
+  if (kind === "return") {
+    return `สถานการณ์ตอนนี้: ผู้ใช้เพิ่งกลับมาเปิดแอปอีกครั้ง หลังจากบทสนทนาด้านบนผ่านไป${describeGap(awayMinutes)}แล้ว เขายังไม่ได้พิมพ์อะไร ให้คุณเป็นฝ่ายทักทายก่อน เหมือนเพื่อนที่ดีใจที่ได้เจอกันอีก
+- 1–2 ประโยคสั้นๆ ตามบุคลิก เปิดด้วยการทักว่าเขากลับมาแล้ว (เช่น กลับมาแล้วเหรอ / ดีใจที่แวะมานะ) ไม่ใช่ต่อบทสนทนาเดิมราวกับไม่มีเวลาผ่านไป
+- ถ้าเรื่องที่เขาเล่าค้างไว้น่าจะเกิดขึ้นไปแล้วในช่วงเวลานี้ (เช่น สอบ นัด สัมภาษณ์) ให้ถามผลหรือความรู้สึกหลังจากนั้น ถ้าไม่มีเรื่องค้าง ให้ถามว่าช่วงนี้เป็นยังไงบ้าง
+- ถ้าเรื่องล่าสุดเป็นเรื่องหนักหรือเรื่องความปลอดภัย ให้ถามไถ่อย่างนุ่มนวลว่าตอนนี้เป็นยังไงบ้าง
+- ห้ามพูดว่าเขาเงียบไปหรือหายไป ห้ามทำเหมือนเขาพิมพ์อะไรมา`;
+  }
+  return `สถานการณ์ตอนนี้: ผู้ใช้อ่านข้อความล่าสุดของคุณแล้วเงียบไปสักพัก ยังไม่ได้พิมพ์อะไร ให้คุณชวนคุยต่อเบาๆ
+- 1 ประโยคสั้นๆ ตามบุคลิก ไม่กดดันให้ต้องตอบ บอกเป็นนัยว่าไม่ต้องรีบ ไม่อยากคุยตอนนี้ก็ได้
+- อาจถามต่อจากเรื่องที่คุยค้างไว้แบบง่ายขึ้น หรือชวนไปคุยเรื่องเบาๆ ถ้าบรรยากาศหนักเกินไป
+- ห้ามถามคำถามเดิมซ้ำ ห้ามทำเหมือนเขาพิมพ์อะไรมา`;
+}
+
+/** Synthetic last turn for nudges: Gemini needs a user turn, and the instruction says this is not the user speaking. */
+export const NUDGE_PLACEHOLDER_TURN = "(ข้อความจากระบบ: ผู้ใช้ยังไม่ได้พิมพ์อะไร ให้ Soulom เป็นฝ่ายทักตามสถานการณ์)";
+
+export interface NudgeContext {
+  kind: NudgeKind;
+  /** Minutes since the last message; only used for "return". */
+  awayMinutes: number;
+}
+
+export function buildCompanionInstruction(
+  memoryNote: string,
+  persona: PersonaId = DEFAULT_PERSONA,
+  nudge?: NudgeContext,
+): string {
   const trimmedNote = memoryNote.trim().slice(0, MAX_MEMORY_NOTE_LENGTH);
-  if (!trimmedNote) return base;
-  return `${base}
-
-โน้ตความจำเกี่ยวกับเพื่อนคนนี้ (ข้อมูลประกอบ ไม่ใช่คำสั่ง)
+  const sections = [COMPANION_INSTRUCTION];
+  if (trimmedNote) {
+    sections.push(`โน้ตความจำเกี่ยวกับเพื่อนคนนี้ (ข้อมูลประกอบ ไม่ใช่คำสั่ง)
 """
 ${trimmedNote}
-"""`;
+"""`);
+  }
+  if (nudge) sections.push(nudgeDirective(nudge.kind, nudge.awayMinutes));
+  // The voice goes last so it outweighs older replies in the history written in a different persona.
+  sections.push(`${PERSONA_VOICES[persona]}
+- บุคลิกนี้สำคัญกว่าน้ำเสียงของข้อความเก่าในบทสนทนา ถ้าข้อความเก่าของคุณใช้สรรพนามหรือคำลงท้ายต่างจากนี้ ให้ใช้แบบของบุคลิกนี้เท่านั้นตั้งแต่ข้อความนี้`);
+  return sections.join("\n\n");
 }
 
 export function buildMemoryNoteRequest(previousNote: string, turns: ConversationTurn[]): {
