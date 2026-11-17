@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { SupporterLicense } from "../../hooks/useSupporterLicense";
+import { useI18n } from "../../i18n/I18nProvider";
 import { Modal } from "../Modal";
 import { CardPaymentTab } from "./CardPaymentTab";
 import { PromptPayTab } from "./PromptPayTab";
@@ -8,38 +9,35 @@ import { TipJarTab } from "./TipJarTab";
 
 type SupportChannel = "tip-jar" | "promptpay" | "card";
 
-const CHANNELS: Array<{ id: SupportChannel; label: string }> = [
-  { id: "tip-jar", label: "เลี้ยงกาแฟ" },
-  { id: "promptpay", label: "พร้อมเพย์" },
-  { id: "card", label: "บัตร / ต่างประเทศ" },
-];
+const CHANNELS: SupportChannel[] = ["tip-jar", "promptpay", "card"];
 
 export function SupporterModal({ supporter, onClose }: { supporter: SupporterLicense; onClose: () => void }) {
+  const { t } = useI18n();
   const [activeChannel, setActiveChannel] = useState<SupportChannel>("tip-jar");
 
   return (
     <Modal
       title="Soulom Supporter Space"
-      subtitle="Soulom ไม่มีโฆษณา และไม่ขายข้อมูลใคร ค่าเซิร์ฟเวอร์มาจากคนที่อยากให้ที่นี่อยู่ต่อ"
+      subtitle={t.supporter.subtitle}
       onClose={onClose}
     >
-      <div role="tablist" aria-label="ช่องทางสนับสนุน" className="grid grid-cols-3 gap-1 rounded-2xl bg-night p-1">
+      <div role="tablist" aria-label={t.supporter.channelsAria} className="grid grid-cols-3 gap-1 rounded-2xl bg-night p-1">
         {CHANNELS.map((channel) => {
-          const isActive = channel.id === activeChannel;
+          const isActive = channel === activeChannel;
           return (
             <button
-              key={channel.id}
+              key={channel}
               type="button"
               role="tab"
-              id={`support-tab-${channel.id}`}
+              id={`support-tab-${channel}`}
               aria-selected={isActive}
-              aria-controls={`support-panel-${channel.id}`}
-              onClick={() => setActiveChannel(channel.id)}
+              aria-controls={`support-panel-${channel}`}
+              onClick={() => setActiveChannel(channel)}
               className={`rounded-xl px-2 py-2 text-[13px] transition-colors ${
                 isActive ? "bg-ink-raised font-medium text-cream" : "text-muted hover:text-cream-soft"
               }`}
             >
-              {channel.label}
+              {t.supporter.channels[channel]}
             </button>
           );
         })}

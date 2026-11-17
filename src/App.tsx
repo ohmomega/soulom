@@ -5,18 +5,26 @@ import { CrisisBanner } from "./components/CrisisBanner";
 import { KeepsakeModal } from "./components/memory/KeepsakeModal";
 import { MessageList } from "./components/MessageList";
 import { PersonaModal } from "./components/PersonaModal";
+import { ServiceStatusBanner } from "./components/ServiceStatusBanner";
 import { SupporterModal } from "./components/supporter/SupporterModal";
 import { personaById } from "./config/personas";
 import { useChatSession } from "./hooks/useChatSession";
+import { useServiceStatus } from "./hooks/useServiceStatus";
 import { useSupporterLicense } from "./hooks/useSupporterLicense";
+import { useI18n } from "./i18n/I18nProvider";
 import type { SupporterState } from "./lib/soulomApi";
 
 type OpenPanel = "supporter" | "keepsake" | "persona" | null;
 
 export function App() {
+  const { t, language } = useI18n();
   const [openPanel, setOpenPanel] = useState<OpenPanel>(null);
   const supporter = useSupporterLicense();
   const { reportServerVerdict } = supporter;
+  const isSupporter = supporter.health === "active";
+
+  const service = useServiceStatus(!isSupporter);
+  const { check: recheckService, reportSuccess } = service;
 
   const handleSupporterState = useCallback(
     (state: SupporterState) => {
@@ -26,15 +34,27 @@ export function App() {
     [reportServerVerdict],
   );
 
+  const handleDelivery = useCallback(
+    (delivered: boolean) => {
+      if (delivered) reportSuccess();
+      else void recheckService();
+    },
+    [reportSuccess, recheckService],
+  );
+
   const activeLicenseKey = supporter.health === "rejected" ? null : (supporter.license?.key ?? null);
   const session = useChatSession({
     licenseKey: activeLicenseKey,
-    isSupporter: supporter.health === "active",
+    isSupporter,
+    language,
     onSupporterState: handleSupporterState,
+    onDelivery: handleDelivery,
   });
 
-  const persona = personaById(session.persona);
+  const persona = personaById(session.persona, t);
   const isSoulomTyping = session.isAwaitingReply || session.isNudging;
+  // The latest reply's numbers win; before the first message, show what /api/status reported.
+  const quota = isSupporter ? null : (session.quota ?? service.quota);
 
   const openSupporter = useCallback(() => setOpenPanel("supporter"), []);
   const openPersona = useCallback(() => setOpenPanel("persona"), []);
@@ -44,7 +64,7 @@ export function App() {
   return (
     <div className="flex min-h-full flex-col">
       <ChatHeader
-        isSupporter={supporter.health === "active"}
+        isSupporter={isSupporter}
         personaName={persona.name}
         isPersonaLocked={isSoulomTyping}
         onOpenPersona={openPersona}
@@ -52,6 +72,7 @@ export function App() {
         onOpenSupporter={openSupporter}
       />
 
+      <ServiceStatusBanner problem={service.problem} onRecheck={recheckService} />
       {session.isCrisisBannerVisible && <CrisisBanner onDismiss={session.dismissCrisisBanner} />}
 
       <main className="flex-1">
@@ -60,6 +81,7 @@ export function App() {
           persona={persona}
           isAwaitingReply={isSoulomTyping}
           notice={session.notice}
+          quota={quota}
           onRetry={session.retryLastReply}
           onOpenSupporter={openSupporter}
         />
@@ -67,7 +89,7 @@ export function App() {
 
       <Composer
         disabled={session.isAwaitingReply}
-        quota={session.quota}
+        quota={quota}
         onSend={session.sendMessage}
         onDraftChange={session.noteDraft}
       />

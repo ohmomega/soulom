@@ -1,24 +1,20 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import type { PersonaOption } from "../config/personas";
 import { RENDER_PAGE_SIZE } from "../config/storageLimits";
 import type { ChatNotice } from "../hooks/useChatSession";
-import type { ChatMessage } from "../types/chat";
-import type { PersonaOption } from "../config/personas";
+import { useI18n } from "../i18n/I18nProvider";
+import { describeReset, useMinuteClock } from "../i18n/resetTime";
+import type { ChatMessage, QuotaStatus } from "../types/chat";
 
 interface MessageListProps {
   messages: ChatMessage[];
   persona: PersonaOption;
   isAwaitingReply: boolean;
   notice: ChatNotice | null;
+  quota: QuotaStatus | null;
   onRetry: () => void;
   onOpenSupporter: () => void;
 }
-
-const FAILURE_COPY: Record<Extract<ChatNotice, { kind: "failed" }>["reason"], string> = {
-  offline: "ดูเหมือนอินเทอร์เน็ตจะหลุดไปแป๊บนึง ข้อความของคุณยังอยู่ ลองส่งอีกครั้งได้เลย",
-  unavailable: "ตอนนี้ Soulom ตอบไม่ทัน ลองใหม่อีกทีได้ไหม",
-  blocked: "ข้อความนี้ Soulom ตอบให้ไม่ได้ ลองเล่าด้วยคำอื่นดูนะ",
-  "not-configured": "เซิร์ฟเวอร์ยังไม่ได้ตั้งค่า GEMINI_API_KEY",
-};
 
 function MessageBubble({ message }: { message: ChatMessage }) {
   if (message.role === "user") {
@@ -33,40 +29,57 @@ function MessageBubble({ message }: { message: ChatMessage }) {
   return <p className="max-w-[92%] break-words whitespace-pre-wrap text-cream-soft">{message.text}</p>;
 }
 
-function NoticeCard({ notice, onRetry, onOpenSupporter }: Omit<MessageListProps, "messages" | "isAwaitingReply" | "persona"> & { notice: ChatNotice }) {
+interface NoticeCardProps {
+  notice: ChatNotice;
+  quota: QuotaStatus | null;
+  onRetry: () => void;
+  onOpenSupporter: () => void;
+}
+
+function NoticeCard({ notice, quota, onRetry, onOpenSupporter }: NoticeCardProps) {
+  const { t } = useI18n();
+  const now = useMinuteClock(notice.kind === "quota-exceeded" && Boolean(quota?.resetAt));
+
   if (notice.kind === "quota-exceeded") {
+    const reset = quota?.resetAt && quota.resetAt > now ? describeReset(quota.resetAt, now, t) : null;
     return (
       <div className="animate-settle rounded-2xl border border-line bg-ink px-4 py-3.5 text-sm text-cream-soft">
-        <p>คืนนี้คุยกันครบโควตาฟรีของวันแล้วนะ พรุ่งนี้กลับมาคุยกันต่อได้เสมอ</p>
-        <p className="mt-1 text-muted">
-          ถ้าอยากคุยต่อตอนนี้ แวะดูที่ปุ่มหัวใจมุมขวาบนได้ เป็นการช่วยค่าเซิร์ฟเวอร์ให้ Soulom อยู่ต่อไปด้วย
-        </p>
+        <p>{t.chat.quotaExceeded}</p>
+        {reset && <p className="mt-1">{t.chat.quotaResetsAt(reset.time, reset.countdown)}</p>}
+        <p className="mt-1 text-muted">{t.chat.quotaSupport}</p>
         <button type="button" onClick={onOpenSupporter} className="mt-2 font-medium text-ember hover:underline">
-          เปิดพื้นที่สนับสนุน
+          {t.chat.openSupport}
         </button>
       </div>
     );
   }
   if (notice.kind === "storage-full") {
     return (
-      <p className="animate-settle rounded-2xl border border-clay/30 px-4 py-3 text-sm text-clay">
-        พื้นที่เก็บข้อมูลในเบราว์เซอร์เต็มแล้ว ลองเก็บความทรงจำเป็นไฟล์ .soulom แล้วล้างแชทเก่าออกนะ
-      </p>
+      <p className="animate-settle rounded-2xl border border-clay/30 px-4 py-3 text-sm text-clay">{t.chat.storageFull}</p>
     );
   }
   return (
     <div className="animate-settle rounded-2xl border border-line px-4 py-3 text-sm text-cream-soft">
-      <p>{FAILURE_COPY[notice.reason]}</p>
+      <p>{t.chat.failures[notice.reason]}</p>
       {notice.reason !== "blocked" && notice.reason !== "not-configured" && (
         <button type="button" onClick={onRetry} className="mt-1.5 font-medium text-ember hover:underline">
-          ส่งอีกครั้ง
+          {t.chat.retry}
         </button>
       )}
     </div>
   );
 }
 
-export function MessageList({ messages, persona, isAwaitingReply, notice, onRetry, onOpenSupporter }: MessageListProps) {
+export function MessageList({
+  messages,
+  persona,
+  isAwaitingReply,
+  notice,
+  quota,
+  onRetry,
+  onOpenSupporter,
+}: MessageListProps) {
+  const { t } = useI18n();
   const endRef = useRef<HTMLDivElement>(null);
   // Only the newest messages are drawn, so a long history doesn't slow the phone down.
   const [visibleCount, setVisibleCount] = useState(RENDER_PAGE_SIZE);
@@ -98,7 +111,7 @@ export function MessageList({ messages, persona, isAwaitingReply, notice, onRetr
           onClick={showEarlier}
           className="self-center rounded-full border border-line px-4 py-1.5 text-xs text-muted transition-colors hover:border-line-strong hover:text-cream"
         >
-          แสดงข้อความก่อนหน้า ({hiddenCount})
+          {t.chat.showEarlier(hiddenCount)}
         </button>
       )}
 
@@ -108,7 +121,7 @@ export function MessageList({ messages, persona, isAwaitingReply, notice, onRetr
           <p className="mt-2 text-sm leading-relaxed text-muted">
             {persona.listening}
             <br />
-            ทุกอย่างที่คุยเก็บไว้ในเครื่องนี้เท่านั้น
+            {t.chat.localOnly}
           </p>
         </div>
       )}
@@ -118,7 +131,7 @@ export function MessageList({ messages, persona, isAwaitingReply, notice, onRetr
       ))}
 
       {isAwaitingReply && (
-        <div className="flex gap-1.5 py-2" aria-label="Soulom กำลังพิมพ์">
+        <div className="flex gap-1.5 py-2" aria-label={t.chat.typing}>
           {[0, 1, 2].map((dot) => (
             <span
               key={dot}
@@ -129,7 +142,7 @@ export function MessageList({ messages, persona, isAwaitingReply, notice, onRetr
         </div>
       )}
 
-      {notice && <NoticeCard notice={notice} onRetry={onRetry} onOpenSupporter={onOpenSupporter} />}
+      {notice && <NoticeCard notice={notice} quota={quota} onRetry={onRetry} onOpenSupporter={onOpenSupporter} />}
       <div ref={endRef} />
     </div>
   );

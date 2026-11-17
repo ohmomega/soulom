@@ -1,21 +1,15 @@
 import { useState, type FormEvent } from "react";
 import type { SupporterLicense } from "../../hooks/useSupporterLicense";
 import { checkLicense } from "../../lib/soulomApi";
+import { useI18n } from "../../i18n/I18nProvider";
 import { Button, StatusLine, TextField } from "../ui";
-
-const INVALID_REASON_COPY: Record<string, string> = {
-  expired: "รหัสนี้หมดอายุแล้ว",
-  malformed: "รูปแบบรหัสไม่ถูกต้อง",
-  unknown: "ไม่พบรหัสนี้ในระบบ",
-  unavailable: "ระบบตรวจรหัสไม่ตอบสนอง ลองใหม่อีกสักครู่",
-  too_many_attempts: "ลองกรอกรหัสหลายครั้งเกินไปในวันนี้",
-};
 
 function maskLicenseKey(licenseKey: string): string {
   return licenseKey.length <= 8 ? licenseKey : `${licenseKey.slice(0, 10)}••••${licenseKey.slice(-4)}`;
 }
 
 export function RedeemCodeSection({ supporter }: { supporter: SupporterLicense }) {
+  const { t } = useI18n();
   const [draftKey, setDraftKey] = useState("");
   const [isChecking, setIsChecking] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
@@ -37,8 +31,8 @@ export function RedeemCodeSection({ supporter }: { supporter: SupporterLicense }
     }
     setFeedback(
       outcome.kind === "invalid"
-        ? (INVALID_REASON_COPY[outcome.reason] ?? INVALID_REASON_COPY.unknown!)
-        : "เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง",
+        ? (t.redeem.reasons[outcome.reason] ?? t.redeem.reasons.unknown!)
+        : t.redeem.connectFail,
     );
   };
 
@@ -47,7 +41,7 @@ export function RedeemCodeSection({ supporter }: { supporter: SupporterLicense }
   return (
     <section className="border-t border-line pt-5" aria-labelledby="redeem-heading">
       <h3 id="redeem-heading" className="text-sm font-medium text-cream">
-        มีรหัสปลดล็อกแล้ว
+        {t.redeem.heading}
       </h3>
 
       {license && health === "active" && (
@@ -55,25 +49,25 @@ export function RedeemCodeSection({ supporter }: { supporter: SupporterLicense }
           <div className="min-w-0">
             <p className="flex items-center gap-2 text-sm text-sage">
               <span className="size-1.5 rounded-full bg-sage" />
-              Supporter Active
+              {t.redeem.active}
             </p>
             <p className="mt-0.5 truncate font-mono text-xs text-muted">
               {maskLicenseKey(license.key)}
               {license.expiresAt &&
-                ` · ถึง ${new Date(license.expiresAt).toLocaleDateString("th-TH", { dateStyle: "medium" })}`}
+                t.redeem.until(new Date(license.expiresAt).toLocaleDateString(t.locale, { dateStyle: "medium" }))}
             </p>
           </div>
           <button type="button" onClick={supporter.forget} className="shrink-0 text-xs text-muted hover:text-clay">
-            นำรหัสออก
+            {t.redeem.remove}
           </button>
         </div>
       )}
 
       {license && health === "rejected" && (
         <div className="mt-3">
-          <StatusLine tone="warn">รหัส {maskLicenseKey(license.key)} ใช้ไม่ได้แล้ว (อาจหมดอายุ) ตอนนี้กลับมาใช้โควตาฟรี</StatusLine>
+          <StatusLine tone="warn">{t.redeem.rejected(maskLicenseKey(license.key))}</StatusLine>
           <button type="button" onClick={supporter.forget} className="mt-1 text-xs text-muted hover:text-cream">
-            นำรหัสออก
+            {t.redeem.remove}
           </button>
         </div>
       )}
@@ -83,15 +77,15 @@ export function RedeemCodeSection({ supporter }: { supporter: SupporterLicense }
           <TextField
             value={draftKey}
             onChange={(event) => setDraftKey(event.target.value)}
-            placeholder="SOULOM-TH-… หรือ License Key"
+            placeholder={t.redeem.placeholder}
             autoComplete="off"
             autoCapitalize="characters"
             spellCheck={false}
             maxLength={128}
-            aria-label="รหัสปลดล็อก"
+            aria-label={t.redeem.aria}
           />
           <Button type="submit" tone="primary" disabled={isChecking || !draftKey.trim()} className="shrink-0">
-            {isChecking ? "กำลังตรวจ…" : "ยืนยัน"}
+            {isChecking ? t.redeem.checking : t.redeem.confirm}
           </Button>
         </form>
       )}

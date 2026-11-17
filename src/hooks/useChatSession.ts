@@ -5,7 +5,7 @@ import { containsSelfHarmSignal } from "../lib/crisisDetector";
 import { localVault } from "../lib/localVault";
 import { requestCompanionReply, requestMemoryNote, requestNudge, type SupporterState } from "../lib/soulomApi";
 import type { ChatMessage, ChatRole, QuotaStatus } from "../types/chat";
-import type { NudgeKind } from "../../shared/personaIds";
+import type { Language, NudgeKind } from "../../shared/personaIds";
 
 const MEMORY_NOTE_INTERVAL = 10;
 const MAX_DRAFT_LENGTH = 4000;
@@ -20,7 +20,10 @@ export type ChatNotice =
 interface ChatSessionOptions {
   licenseKey: string | null;
   isSupporter: boolean;
+  language: Language;
   onSupporterState: (state: SupporterState) => void;
+  /** Told whether each message reached the AI, so the service-status banner can react. */
+  onDelivery?: (delivered: boolean) => void;
 }
 
 function createMessage(role: ChatRole, text: string): ChatMessage {
@@ -38,7 +41,7 @@ function capConversation(conversation: ChatMessage[], limit: number): ChatMessag
   return conversation.slice(overflow);
 }
 
-export function useChatSession({ licenseKey, isSupporter, onSupporterState }: ChatSessionOptions) {
+export function useChatSession({ licenseKey, isSupporter, language, onSupporterState, onDelivery }: ChatSessionOptions) {
   const storedLimit = isSupporter ? STORED_MESSAGE_LIMIT.supporter : STORED_MESSAGE_LIMIT.free;
 
   const [messages, setMessages] = useState<ChatMessage[]>(() =>
@@ -67,7 +70,9 @@ export function useChatSession({ licenseKey, isSupporter, onSupporterState }: Ch
     quota,
     storedLimit,
     isAwaitingReply,
+    language,
     onSupporterState,
+    onDelivery,
   });
   latestState.current = {
     licenseKey,
@@ -78,7 +83,9 @@ export function useChatSession({ licenseKey, isSupporter, onSupporterState }: Ch
     quota,
     storedLimit,
     isAwaitingReply,
+    language,
     onSupporterState,
+    onDelivery,
   };
 
   useEffect(() => {
@@ -124,13 +131,22 @@ export function useChatSession({ licenseKey, isSupporter, onSupporterState }: Ch
         licenseKey: currentLicense,
         memoryNote: currentNote,
         persona: currentPersona,
+        language: currentLanguage,
         onSupporterState: reportSupporter,
+        onDelivery: reportDelivery,
       } = latestState.current;
 
-      const outcome = await requestCompanionReply(conversation, currentNote, currentPersona, currentLicense);
+      const outcome = await requestCompanionReply(
+        conversation,
+        currentNote,
+        currentPersona,
+        currentLanguage,
+        currentLicense,
+      );
       setIsAwaitingReply(false);
 
       if (outcome.kind === "reply") {
+        reportDelivery?.(true);
         if (currentLicense) reportSupporter(outcome.supporter);
         setQuota(outcome.supporter.active ? null : outcome.quota);
         const nextConversation = capConversation(
@@ -144,11 +160,12 @@ export function useChatSession({ licenseKey, isSupporter, onSupporterState }: Ch
 
       if (outcome.kind === "quota-exceeded") {
         if (currentLicense) reportSupporter(outcome.supporter);
-        setQuota((current) => (current ? { ...current, remaining: 0 } : current));
+        setQuota((current) => outcome.quota ?? (current ? { ...current, remaining: 0 } : current));
         setNotice({ kind: "quota-exceeded" });
         return;
       }
 
+      if (outcome.reason === "unavailable" || outcome.reason === "offline") reportDelivery?.(false);
       setNotice({ kind: "failed", reason: outcome.reason });
     },
     [refreshMemoryNoteIfDue],
@@ -168,7 +185,15 @@ export function useChatSession({ licenseKey, isSupporter, onSupporterState }: Ch
     const controller = new AbortController();
     nudgeRequest.current = controller;
     setIsNudging(true);
-    const text = await requestNudge(conversation, state.memoryNote, state.persona, kind, state.licenseKey, controller.signal);
+    const text = await requestNudge(
+      conversation,
+      state.memoryNote,
+      state.persona,
+      state.language,
+      kind,
+      state.licenseKey,
+      controller.signal,
+    );
     if (nudgeRequest.current === controller) {
       nudgeRequest.current = null;
       setIsNudging(false);

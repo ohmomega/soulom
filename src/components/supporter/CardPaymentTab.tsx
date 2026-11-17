@@ -1,17 +1,16 @@
 import { supportLinks } from "../../config/supportLinks";
+import { useI18n } from "../../i18n/I18nProvider";
 import { LinkButton } from "../ui";
 
 export function CardPaymentTab() {
+  const { t } = useI18n();
   return (
     <div className="space-y-4 text-sm leading-relaxed text-cream-soft">
-      <p>
-        ชำระด้วยบัตรเครดิตหรือเดบิตจากทุกประเทศผ่าน Lemon Squeezy หลังชำระเสร็จ คุณจะได้รับ License Key ทางอีเมล
-        นำมากรอกในช่องด้านล่างเพื่อคุยได้ไม่จำกัด
-      </p>
+      <p>{t.supporter.cardBody}</p>
       {supportLinks.lemonSqueezyUrl ? (
-        <LinkButton href={supportLinks.lemonSqueezyUrl}>ไปหน้าชำระเงิน</LinkButton>
+        <LinkButton href={supportLinks.lemonSqueezyUrl}>{t.supporter.cardButton}</LinkButton>
       ) : (
-        <p className="rounded-xl border border-line px-4 py-3 text-muted">ช่องทางนี้ยังไม่เปิดใช้งาน</p>
+        <p className="rounded-xl border border-line px-4 py-3 text-muted">{t.supporter.unavailable}</p>
       )}
     </div>
   );

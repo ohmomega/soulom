@@ -10,6 +10,8 @@ export interface ChatMessage {
 export interface QuotaStatus {
   limit: number;
   remaining: number;
+  /** Epoch ms when the free allowance refills (midnight in Thailand). */
+  resetAt: number | null;
 }
 
 export interface StoredLicense {

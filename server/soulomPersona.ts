@@ -1,4 +1,4 @@
-import { DEFAULT_PERSONA, type NudgeKind, type PersonaId } from "../shared/personaIds";
+import { DEFAULT_LANGUAGE, DEFAULT_PERSONA, type Language, type NudgeKind, type PersonaId } from "../shared/personaIds";
 import type { ConversationTurn } from "./geminiClient";
 
 export { DEFAULT_PERSONA, isNudgeKind, isPersonaId, type NudgeKind, type PersonaId } from "../shared/personaIds";
@@ -46,6 +46,7 @@ const MEMORY_NOTE_INSTRUCTION = `คุณคือผู้ช่วยจด�
 - เน้น: ชื่อเล่นหรือชื่อที่อยากให้เรียก เรื่องที่กังวลหรือกำลังเผชิญ สิ่งที่ชอบหรือช่วยให้รู้สึกดี คนสำคัญในชีวิต เรื่องที่ค้างไว้อยากคุยต่อ
 - จดเฉพาะสิ่งที่ผู้ใช้เล่าจริงเท่านั้น ห้ามเดาหรือแต่งเพิ่ม ถ้ายังมีข้อมูลน้อยก็เขียนเท่าที่มี
 - ห้ามจดเลขบัตร เบอร์โทร ที่อยู่ รหัสผ่าน หรือข้อมูลทางการเงิน
+- เขียนโน้ตด้วยภาษาเดียวกับที่ผู้ใช้ใช้คุยเป็นส่วนใหญ่
 - ตอบเฉพาะตัวโน้ต ไม่ต้องมีคำนำหรือคำอธิบาย`;
 
 export const MAX_MEMORY_NOTE_LENGTH = 1500;
@@ -81,9 +82,24 @@ export interface NudgeContext {
   awayMinutes: number;
 }
 
+const ENGLISH_VOICES: Record<PersonaId, string> = {
+  friend: `a close friend: casual, warm and easygoing, says "I", light humour when it fits, never crude`,
+  kind: `a kind older sister: gentle, nurturing and patient, soft reassurance, sincerely notices their effort`,
+  polite: `a polite listener: calm, courteous and respectful, measured and unhurried, warm but not overly familiar`,
+};
+
+// Placed after the persona voice so it overrides the Thai-only rules about pronouns and particles.
+function englishSection(persona: PersonaId): string {
+  return `ภาษา: ผู้ใช้ตั้งแอปเป็นภาษาอังกฤษ ให้ตอบเป็นภาษาอังกฤษที่เป็นธรรมชาติเสมอ ถ้าเขาพิมพ์ภาษาไทยมา ค่อยตอบภาษาไทยตามบุคลิกด้านบน
+- ในภาษาอังกฤษ ให้รักษาบุคลิกนี้ไว้ในรูปแบบ: ${ENGLISH_VOICES[persona]}
+- กฎเรื่องสรรพนามและคำลงท้ายภาษาไทยด้านบน (เรา/พี่/ผม, ครับ/ค่ะ) ใช้เฉพาะตอนตอบภาษาไทย
+- เรื่องสายด่วน: ในภาษาอังกฤษให้บอกว่า Thailand's mental health hotline 1323 (free, 24/7) และ 1669 for emergencies in Thailand และถ้าอยู่นอกประเทศไทย ให้ติดต่อเบอร์ฉุกเฉินหรือสายด่วนในประเทศนั้น`;
+}
+
 export function buildCompanionInstruction(
   memoryNote: string,
   persona: PersonaId = DEFAULT_PERSONA,
+  language: Language = DEFAULT_LANGUAGE,
   nudge?: NudgeContext,
 ): string {
   const trimmedNote = memoryNote.trim().slice(0, MAX_MEMORY_NOTE_LENGTH);
@@ -98,6 +114,7 @@ ${trimmedNote}
   // The voice goes last so it outweighs older replies in the history written in a different persona.
   sections.push(`${PERSONA_VOICES[persona]}
 - บุคลิกนี้สำคัญกว่าน้ำเสียงของข้อความเก่าในบทสนทนา ถ้าข้อความเก่าของคุณใช้สรรพนามหรือคำลงท้ายต่างจากนี้ ให้ใช้แบบของบุคลิกนี้เท่านั้นตั้งแต่ข้อความนี้`);
+  if (language === "en") sections.push(englishSection(persona));
   return sections.join("\n\n");
 }
 

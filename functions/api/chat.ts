@@ -9,6 +9,8 @@ import {
 } from "../../server/geminiClient";
 import { fingerprintClient, isPlainObject, jsonResponse, readJsonBody } from "../../server/http";
 import { resolveStore } from "../../server/keyValueStore";
+import { recordUpstreamFailure } from "../../server/serviceHealth";
+import { DEFAULT_LANGUAGE, isLanguage, type Language } from "../../shared/personaIds";
 import { verifyLicenseKey, type LicenseVerdict } from "../../server/license";
 import {
   buildCompanionInstruction,
@@ -39,6 +41,7 @@ interface ChatRequest {
   turns: ConversationTurn[];
   memoryNote: string;
   persona: PersonaId;
+  language: Language;
   nudge?: NudgeContext;
 }
 
@@ -52,6 +55,7 @@ function parseChatRequest(body: unknown): ChatRequest | null {
   const mode = readMode(body.mode);
   const memoryNote = typeof body.memoryNote === "string" ? body.memoryNote.slice(0, MAX_MEMORY_NOTE_LENGTH) : "";
   const persona = isPersonaId(body.persona) ? body.persona : DEFAULT_PERSONA;
+  const language = isLanguage(body.language) ? body.language : DEFAULT_LANGUAGE;
 
   const turns: ConversationTurn[] = [];
   for (const candidate of body.messages.slice(-SLIDING_WINDOW_SIZE)) {
@@ -72,14 +76,14 @@ function parseChatRequest(body: unknown): ChatRequest | null {
       typeof body.awayMinutes === "number" && Number.isFinite(body.awayMinutes)
         ? Math.min(Math.max(Math.round(body.awayMinutes), 0), MAX_AWAY_MINUTES)
         : 0;
-    return { mode, turns: preparedTurns, memoryNote, persona, nudge: { kind: body.nudge, awayMinutes } };
+    return { mode, turns: preparedTurns, memoryNote, persona, language, nudge: { kind: body.nudge, awayMinutes } };
   }
 
   const preparedTurns = prepareTurnsForGemini(turns);
   if (preparedTurns.length === 0) return null;
   if (mode === "chat" && preparedTurns.at(-1)?.role !== "user") return null;
 
-  return { mode, turns: preparedTurns, memoryNote, persona };
+  return { mode, turns: preparedTurns, memoryNote, persona, language };
 }
 
 function describeSupporter(verdict: LicenseVerdict | null) {
@@ -105,7 +109,12 @@ function buildGeneration(chatRequest: ChatRequest) {
     };
   }
   return {
-    systemInstruction: buildCompanionInstruction(chatRequest.memoryNote, chatRequest.persona, chatRequest.nudge),
+    systemInstruction: buildCompanionInstruction(
+      chatRequest.memoryNote,
+      chatRequest.persona,
+      chatRequest.language,
+      chatRequest.nudge,
+    ),
     turns: chatRequest.turns,
     temperature: chatRequest.mode === "nudge" ? 0.9 : 0.85,
     maxOutputTokens: chatRequest.mode === "nudge" ? 256 : 1024,
@@ -153,11 +162,17 @@ export const onRequestPost: PagesFunction<SoulomEnv> = async ({ request, env }) 
     if (error instanceof GeminiRequestError && error.kind === "blocked") {
       return jsonResponse({ error: "reply_blocked" }, 422);
     }
+    await recordUpstreamFailure(store);
     return jsonResponse({ error: "upstream_unavailable" }, 502);
   }
 
   if (quota && clientFingerprint) {
-    quota = await consumeDailyQuota(store, quotaScope, clientFingerprint, quota);
+    try {
+      quota = await consumeDailyQuota(store, quotaScope, clientFingerprint, quota);
+    } catch {
+      // The reply is already written; a failed counter write (e.g. KV daily write limit) must not lose it.
+      quota = { ...quota, used: quota.used + 1, remaining: Math.max(0, quota.remaining - 1) };
+    }
   }
 
   if (chatRequest.mode === "memory-note") return jsonResponse({ memoryNote: tidyMemoryNote(reply), supporter });

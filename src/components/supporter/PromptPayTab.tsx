@@ -2,30 +2,21 @@ import { useState, type ChangeEvent } from "react";
 import { submitPaymentSlip, type SlipOutcome } from "../../lib/soulomApi";
 import type { StoredLicense } from "../../types/chat";
 import { CopyIcon } from "../icons";
+import { useI18n } from "../../i18n/I18nProvider";
+import type { Strings } from "../../i18n/strings";
 import { Button, StatusLine } from "../ui";
 
 const MAX_SLIP_BYTES = 5 * 1024 * 1024;
 
-const REJECTION_COPY: Record<string, string> = {
-  slip_already_used: "สลิปนี้เคยใช้รับรหัสไปแล้ว",
-  slip_unreadable: "อ่านข้อมูลจากสลิปไม่ได้ ลองใช้รูปที่ชัดขึ้นและเห็น QR บนสลิปครบ",
-  slip_wrong_receiver: "สลิปนี้ไม่ได้โอนเข้าบัญชีของ Soulom",
-  slip_invalid_file: "ไฟล์ต้องเป็นรูปภาพขนาดไม่เกิน 5 MB",
-  slip_missing: "ยังไม่ได้เลือกรูปสลิป",
-  too_many_attempts: "ลองส่งสลิปหลายครั้งเกินไปในวันนี้ ลองใหม่พรุ่งนี้นะ",
-  slip_verification_unavailable: "ระบบตรวจสลิปยังไม่เปิดใช้งาน",
-  slip_service_unavailable: "ระบบตรวจสลิปไม่ตอบสนอง ลองใหม่อีกสักครู่",
-  offline: "เชื่อมต่ออินเทอร์เน็ตไม่ได้",
-};
-
-function describeRejection(outcome: Extract<SlipOutcome, { kind: "rejected" }>): string {
+function describeRejection(outcome: Extract<SlipOutcome, { kind: "rejected" }>, t: Strings): string {
   if (outcome.code === "slip_amount_too_low") {
-    return `ยอดโอนขั้นต่ำสำหรับรับรหัสคือ ${outcome.minimumAmount ?? ""} บาท`;
+    return t.promptPay.minAmount(String(outcome.minimumAmount ?? ""));
   }
-  return REJECTION_COPY[outcome.code] ?? "ตรวจสลิปไม่สำเร็จ ลองใหม่อีกครั้ง";
+  return t.promptPay.rejections[outcome.code] ?? t.promptPay.genericReject;
 }
 
 export function PromptPayTab({ onLicenseIssued }: { onLicenseIssued: (license: StoredLicense) => void }) {
+  const { t } = useI18n();
   const [isQrAvailable, setIsQrAvailable] = useState(true);
   const [isVerifying, setIsVerifying] = useState(false);
   const [outcome, setOutcome] = useState<SlipOutcome | null>(null);
@@ -61,17 +52,17 @@ export function PromptPayTab({ onLicenseIssued }: { onLicenseIssued: (license: S
 
   return (
     <div className="space-y-4 text-sm leading-relaxed text-cream-soft">
-      <p>สแกนจ่ายผ่านแอปธนาคารไหนก็ได้ แล้วอัปโหลดสลิปเพื่อรับรหัสปลดล็อกใช้งานไม่จำกัด 30 วัน</p>
+      <p>{t.promptPay.body}</p>
 
       {isQrAvailable ? (
         <img
           src="/promptpay-qr.png"
-          alt="QR Code พร้อมเพย์สำหรับสนับสนุน Soulom"
+          alt={t.promptPay.qrAlt}
           onError={() => setIsQrAvailable(false)}
           className="mx-auto aspect-square w-full max-w-60 rounded-2xl bg-cream object-contain p-3"
         />
       ) : (
-        <p className="rounded-xl border border-line px-4 py-3 text-muted">ยังไม่ได้ตั้งค่า QR พร้อมเพย์</p>
+        <p className="rounded-xl border border-line px-4 py-3 text-muted">{t.promptPay.qrMissing}</p>
       )}
 
       <label
@@ -80,24 +71,23 @@ export function PromptPayTab({ onLicenseIssued }: { onLicenseIssued: (license: S
         }`}
       >
         <input type="file" accept="image/*" className="sr-only" onChange={handleSlipSelected} disabled={isVerifying} />
-        {isVerifying ? "กำลังตรวจสลิป…" : "อัปโหลดสลิปโอนเงิน"}
+        {isVerifying ? t.promptPay.verifying : t.promptPay.upload}
       </label>
 
-      {outcome?.kind === "rejected" && <StatusLine tone="warn">{describeRejection(outcome)}</StatusLine>}
+      {outcome?.kind === "rejected" && <StatusLine tone="warn">{describeRejection(outcome, t)}</StatusLine>}
 
       {outcome?.kind === "issued" && (
         <div className="animate-settle space-y-2 rounded-2xl border border-sage/40 bg-night px-4 py-3.5">
-          <p className="text-sage">ขอบคุณมากนะ ปลดล็อกให้เรียบร้อยแล้ว</p>
+          <p className="text-sage">{t.promptPay.thanks}</p>
           <div className="flex items-center justify-between gap-3">
             <code className="font-mono text-[13px] tracking-wide break-all text-cream select-all">{outcome.licenseKey}</code>
-            <Button onClick={() => copyIssuedKey(outcome.licenseKey)} className="shrink-0 px-3 py-1.5" aria-label="คัดลอกรหัส">
+            <Button onClick={() => copyIssuedKey(outcome.licenseKey)} className="shrink-0 px-3 py-1.5" aria-label={t.promptPay.copyAria}>
               <CopyIcon width={16} height={16} />
-              {isCopied ? "คัดลอกแล้ว" : "คัดลอก"}
+              {isCopied ? t.promptPay.copied : t.promptPay.copy}
             </Button>
           </div>
           <p className="text-xs text-muted">
-            ใช้ได้ถึง {new Date(outcome.expiresAt).toLocaleDateString("th-TH", { dateStyle: "long" })} · จดรหัสนี้เก็บไว้
-            เผื่อเปลี่ยนเครื่อง
+            {t.promptPay.validUntil(new Date(outcome.expiresAt).toLocaleDateString(t.locale, { dateStyle: "long" }))}
           </p>
         </div>
       )}

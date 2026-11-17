@@ -8,15 +8,9 @@ import {
   type MemorySnapshot,
   type SoulomEnvelope,
 } from "../../lib/soulomFile";
+import { useI18n } from "../../i18n/I18nProvider";
+import type { Strings } from "../../i18n/strings";
 import { Button, StatusLine, TextField } from "../ui";
-
-const FILE_ERROR_COPY: Record<SoulomFileError["code"], string> = {
-  unreadable: "ไฟล์นี้ไม่ใช่ไฟล์ .soulom",
-  unsupported: "ไฟล์นี้มาจาก Soulom เวอร์ชันที่ไม่รองรับ",
-  corrupted: "ไฟล์เสียหายหรือถูกแก้ไข จึงไม่กู้คืนเพื่อความปลอดภัย",
-  "wrong-password": "รหัสผ่านไม่ถูกต้อง",
-  "too-large": "ไฟล์ใหญ่เกินไป",
-};
 
 type ImportStage =
   | { step: "idle" }
@@ -24,11 +18,12 @@ type ImportStage =
   | { step: "preview"; snapshot: MemorySnapshot }
   | { step: "restored"; messageCount: number };
 
-function describeError(error: unknown): string {
-  return error instanceof SoulomFileError ? FILE_ERROR_COPY[error.code] : "เปิดไฟล์ไม่สำเร็จ";
+function describeError(error: unknown, t: Strings): string {
+  return error instanceof SoulomFileError ? t.importMemory.errors[error.code] : t.importMemory.genericError;
 }
 
 export function ImportMemorySection({ onRestore }: { onRestore: (snapshot: MemorySnapshot) => void }) {
+  const { t } = useI18n();
   const [stage, setStage] = useState<ImportStage>({ step: "idle" });
   const [password, setPassword] = useState("");
   const [isUnlocking, setIsUnlocking] = useState(false);
@@ -42,7 +37,7 @@ export function ImportMemorySection({ onRestore }: { onRestore: (snapshot: Memor
     setPassword("");
 
     if (file.size > MAX_SOULOM_FILE_BYTES) {
-      setError(FILE_ERROR_COPY["too-large"]);
+      setError(t.importMemory.errors["too-large"]);
       return;
     }
 
@@ -51,7 +46,7 @@ export function ImportMemorySection({ onRestore }: { onRestore: (snapshot: Memor
       setStage(envelope.mode === "vault" ? { step: "locked", envelope } : { step: "preview", snapshot: openQuickSave(envelope) });
     } catch (fileError) {
       setStage({ step: "idle" });
-      setError(describeError(fileError));
+      setError(describeError(fileError, t));
     }
   };
 
@@ -64,7 +59,7 @@ export function ImportMemorySection({ onRestore }: { onRestore: (snapshot: Memor
       setStage({ step: "preview", snapshot: await openVaultLock(stage.envelope, password) });
       setPassword("");
     } catch (unlockError) {
-      setError(describeError(unlockError));
+      setError(describeError(unlockError, t));
     } finally {
       setIsUnlocking(false);
     }
@@ -79,37 +74,37 @@ export function ImportMemorySection({ onRestore }: { onRestore: (snapshot: Memor
   return (
     <section aria-labelledby="import-heading" className="border-t border-line pt-5">
       <h3 id="import-heading" className="text-sm font-medium text-cream">
-        กู้คืนความทรงจำ
+        {t.importMemory.heading}
       </h3>
 
       {(stage.step === "idle" || stage.step === "restored") && (
         <label className="mt-3 flex cursor-pointer items-center justify-center rounded-xl border border-dashed border-line-strong px-4 py-3 text-sm text-cream-soft transition-colors hover:border-ember">
           <input type="file" accept=".soulom,application/json,application/octet-stream" className="sr-only" onChange={handleFileSelected} />
-          เลือกไฟล์ .soulom
+          {t.importMemory.choose}
         </label>
       )}
 
       {stage.step === "locked" && (
         <form onSubmit={unlock} className="mt-3 space-y-2.5">
-          <p className="text-sm text-cream-soft">ไฟล์นี้ล็อกด้วย Vault Lock</p>
+          <p className="text-sm text-cream-soft">{t.importMemory.locked}</p>
           {stage.envelope.hint && (
             <p className="rounded-xl bg-night px-4 py-2.5 text-sm break-words whitespace-pre-wrap text-muted">
-              คำใบ้: {stage.envelope.hint}
+              {t.importMemory.hint(stage.envelope.hint)}
             </p>
           )}
           <TextField
             type="password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
-            placeholder="รหัสผ่านหรือ PIN"
+            placeholder={t.importMemory.passwordPlaceholder}
             autoComplete="current-password"
-            aria-label="รหัสผ่านไฟล์"
+            aria-label={t.importMemory.passwordAria}
             autoFocus
           />
           <div className="flex gap-2">
-            <Button onClick={() => setStage({ step: "idle" })}>ยกเลิก</Button>
+            <Button onClick={() => setStage({ step: "idle" })}>{t.common.cancel}</Button>
             <Button type="submit" tone="primary" className="flex-1" disabled={isUnlocking || !password}>
-              {isUnlocking ? "กำลังปลดล็อก…" : "ปลดล็อก"}
+              {isUnlocking ? t.importMemory.unlocking : t.importMemory.unlock}
             </Button>
           </div>
         </form>
@@ -119,21 +114,23 @@ export function ImportMemorySection({ onRestore }: { onRestore: (snapshot: Memor
         <div className="mt-3 space-y-3">
           <div className="rounded-2xl bg-night px-4 py-3 text-sm text-cream-soft">
             <p>
-              {stage.snapshot.messages.length} ข้อความ · เก็บเมื่อ{" "}
-              {new Date(stage.snapshot.exportedAt).toLocaleString("th-TH", { dateStyle: "medium", timeStyle: "short" })}
+              {t.importMemory.summary(
+                stage.snapshot.messages.length,
+                new Date(stage.snapshot.exportedAt).toLocaleString(t.locale, { dateStyle: "medium", timeStyle: "short" }),
+              )}
             </p>
             {stage.snapshot.messages.at(-1) && (
               <p className="mt-1.5 line-clamp-2 break-words whitespace-pre-wrap text-muted">
                 “{stage.snapshot.messages.at(-1)!.text}”
               </p>
             )}
-            {stage.snapshot.licenseKey && <p className="mt-1.5 text-xs text-sage">มีรหัสผู้สนับสนุนแนบมาด้วย</p>}
+            {stage.snapshot.licenseKey && <p className="mt-1.5 text-xs text-sage">{t.importMemory.hasLicense}</p>}
           </div>
-          <p className="text-xs text-muted">การกู้คืนจะแทนที่บทสนทนาที่อยู่ในเครื่องนี้ตอนนี้ทั้งหมด</p>
+          <p className="text-xs text-muted">{t.importMemory.replaceWarning}</p>
           <div className="flex gap-2">
-            <Button onClick={() => setStage({ step: "idle" })}>ยกเลิก</Button>
+            <Button onClick={() => setStage({ step: "idle" })}>{t.common.cancel}</Button>
             <Button tone="primary" className="flex-1" onClick={confirmRestore}>
-              กู้คืน
+              {t.importMemory.restore}
             </Button>
           </div>
         </div>
@@ -141,7 +138,7 @@ export function ImportMemorySection({ onRestore }: { onRestore: (snapshot: Memor
 
       {stage.step === "restored" && (
         <div className="mt-2">
-          <StatusLine tone="calm">กู้คืน {stage.messageCount} ข้อความเรียบร้อยแล้ว</StatusLine>
+          <StatusLine tone="calm">{t.importMemory.restored(stage.messageCount)}</StatusLine>
         </div>
       )}
       {error && (

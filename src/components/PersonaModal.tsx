@@ -1,4 +1,5 @@
-import { PERSONAS, type PersonaId } from "../config/personas";
+import { personaOptions, type PersonaId } from "../config/personas";
+import { useI18n } from "../i18n/I18nProvider";
 import { Modal } from "./Modal";
 
 interface PersonaModalProps {
@@ -10,10 +11,12 @@ interface PersonaModalProps {
 }
 
 export function PersonaModal({ current, nudgesEnabled, onSelect, onToggleNudges, onClose }: PersonaModalProps) {
+  const { t } = useI18n();
+
   return (
-    <Modal title="เลือกบุคลิกของ Soulom" subtitle="เปลี่ยนได้ทุกเมื่อ เรื่องที่คุยไว้ยังจำได้เหมือนเดิม" onClose={onClose}>
+    <Modal title={t.persona.title} subtitle={t.persona.subtitle} onClose={onClose}>
       <div className="flex flex-col gap-3">
-        {PERSONAS.map((persona) => {
+        {personaOptions(t).map((persona) => {
           const isSelected = persona.id === current;
           return (
             <button
@@ -30,7 +33,7 @@ export function PersonaModal({ current, nudgesEnabled, onSelect, onToggleNudges,
             >
               <span className="flex items-center justify-between gap-3">
                 <span className="text-[15px] font-semibold text-cream">{persona.name}</span>
-                {isSelected && <span className="text-xs font-medium text-ember">กำลังใช้</span>}
+                {isSelected && <span className="text-xs font-medium text-ember">{t.persona.current}</span>}
               </span>
               <span className="mt-0.5 block text-sm text-muted">{persona.summary}</span>
               <span className="mt-2.5 block rounded-xl bg-night/70 px-3 py-2 text-sm leading-relaxed text-cream-soft">
@@ -43,10 +46,8 @@ export function PersonaModal({ current, nudgesEnabled, onSelect, onToggleNudges,
 
       <label className="mt-5 flex cursor-pointer items-start justify-between gap-4 rounded-2xl border border-line px-4 py-3.5">
         <span>
-          <span className="block text-[15px] font-medium text-cream">ให้ Soulom ทักก่อนได้</span>
-          <span className="mt-0.5 block text-sm leading-relaxed text-muted">
-            ทักเมื่อกลับมาเปิดแอป หรือชวนคุยเบาๆ เมื่อแชทเงียบไปสักพัก ไม่หักโควตาข้อความของคุณ
-          </span>
+          <span className="block text-[15px] font-medium text-cream">{t.persona.nudgeTitle}</span>
+          <span className="mt-0.5 block text-sm leading-relaxed text-muted">{t.persona.nudgeDetail}</span>
         </span>
         <input
           type="checkbox"
@@ -57,9 +58,7 @@ export function PersonaModal({ current, nudgesEnabled, onSelect, onToggleNudges,
         />
       </label>
 
-      <p className="mt-4 text-xs leading-relaxed text-muted">
-        ทุกบุคลิกดูแลความปลอดภัยแบบเดียวกัน และบอกตามจริงเสมอว่าเป็น AI
-      </p>
+      <p className="mt-4 text-xs leading-relaxed text-muted">{t.persona.safetyNote}</p>
     </Modal>
   );
 }

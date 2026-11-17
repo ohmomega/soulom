@@ -1,6 +1,6 @@
 import type { ChatMessage, QuotaStatus } from "../types/chat";
 import type { PersonaId } from "../config/personas";
-import type { NudgeKind } from "../../shared/personaIds";
+import type { Language, NudgeKind } from "../../shared/personaIds";
 import { isRecord } from "./schema";
 
 export const SLIDING_WINDOW_SIZE = 20;
@@ -13,7 +13,7 @@ export interface SupporterState {
 
 export type ReplyOutcome =
   | { kind: "reply"; text: string; quota: QuotaStatus | null; supporter: SupporterState }
-  | { kind: "quota-exceeded"; supporter: SupporterState }
+  | { kind: "quota-exceeded"; quota: QuotaStatus | null; supporter: SupporterState }
   | { kind: "failed"; reason: "blocked" | "offline" | "unavailable" | "not-configured" };
 
 function toApiTurns(messages: ChatMessage[]) {
@@ -39,7 +39,11 @@ function readSupporter(payload: Record<string, unknown>): SupporterState {
 function readQuota(payload: Record<string, unknown>): QuotaStatus | null {
   const quota = payload.quota;
   if (!isRecord(quota) || typeof quota.limit !== "number" || typeof quota.remaining !== "number") return null;
-  return { limit: quota.limit, remaining: quota.remaining };
+  return {
+    limit: quota.limit,
+    remaining: quota.remaining,
+    resetAt: typeof quota.resetAt === "number" && Number.isFinite(quota.resetAt) ? quota.resetAt : null,
+  };
 }
 
 async function postJson(path: string, body: unknown, licenseKey: string | null, signal?: AbortSignal) {
@@ -57,12 +61,18 @@ export async function requestCompanionReply(
   messages: ChatMessage[],
   memoryNote: string,
   persona: PersonaId,
+  language: Language,
   licenseKey: string | null,
   signal?: AbortSignal,
 ): Promise<ReplyOutcome> {
   let result: Awaited<ReturnType<typeof postJson>>;
   try {
-    result = await postJson("/api/chat", { mode: "chat", messages: toApiTurns(messages), memoryNote, persona }, licenseKey, signal);
+    result = await postJson(
+      "/api/chat",
+      { mode: "chat", messages: toApiTurns(messages), memoryNote, persona, language },
+      licenseKey,
+      signal,
+    );
   } catch {
     return { kind: "failed", reason: "offline" };
   }
@@ -72,7 +82,7 @@ export async function requestCompanionReply(
     return { kind: "reply", text: payload.reply, quota: readQuota(payload), supporter: readSupporter(payload) };
   }
   if (status === 429 && payload.error === "quota_exceeded") {
-    return { kind: "quota-exceeded", supporter: readSupporter(payload) };
+    return { kind: "quota-exceeded", quota: readQuota(payload), supporter: readSupporter(payload) };
   }
   if (status === 422) return { kind: "failed", reason: "blocked" };
   if (status === 503) return { kind: "failed", reason: "not-configured" };
@@ -101,6 +111,7 @@ export async function requestNudge(
   messages: ChatMessage[],
   memoryNote: string,
   persona: PersonaId,
+  language: Language,
   nudge: NudgeKind,
   licenseKey: string | null,
   signal?: AbortSignal,
@@ -115,6 +126,7 @@ export async function requestNudge(
         messages: toApiTurns(messages),
         memoryNote,
         persona,
+        language,
       },
       licenseKey,
       signal,
@@ -169,5 +181,29 @@ export async function submitPaymentSlip(slipImage: File): Promise<SlipOutcome> {
     };
   } catch {
     return { kind: "rejected", code: "offline" };
+  }
+}
+
+export type ServiceStatus = "ok" | "degraded" | "down";
+
+export interface StatusReport {
+  status: ServiceStatus;
+  quota: QuotaStatus | null;
+}
+
+/** Cheap health + allowance check (no AI call). Returns null when the server can't be reached at all. */
+export async function fetchServiceStatus(includeQuota: boolean): Promise<StatusReport | null> {
+  try {
+    const response = await fetch(`/api/status${includeQuota ? "" : "?quota=0"}`, {
+      signal: AbortSignal.timeout(8000),
+      cache: "no-store",
+    });
+    if (!response.ok) return null;
+    const payload: unknown = await response.json();
+    if (!isRecord(payload)) return null;
+    const status = payload.status === "degraded" || payload.status === "down" ? payload.status : "ok";
+    return { status, quota: readQuota(payload) };
+  } catch {
+    return null;
   }
 }

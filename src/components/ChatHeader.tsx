@@ -1,3 +1,4 @@
+import { useI18n } from "../i18n/I18nProvider";
 import { HeartIcon, KeepsakeIcon, MoonMark } from "./icons";
 
 interface ChatHeaderProps {
@@ -9,7 +10,16 @@ interface ChatHeaderProps {
   onOpenSupporter: () => void;
 }
 
-export function ChatHeader({ isSupporter, personaName, isPersonaLocked, onOpenPersona, onOpenKeepsake, onOpenSupporter }: ChatHeaderProps) {
+export function ChatHeader({
+  isSupporter,
+  personaName,
+  isPersonaLocked,
+  onOpenPersona,
+  onOpenKeepsake,
+  onOpenSupporter,
+}: ChatHeaderProps) {
+  const { t, language, setLanguage } = useI18n();
+
   return (
     <header className="sticky top-0 z-20 border-b border-line/70 bg-night/95 pt-[env(safe-area-inset-top)]">
       <div className="mx-auto flex h-14 max-w-2xl items-center justify-between gap-2 px-4">
@@ -20,9 +30,9 @@ export function ChatHeader({ isSupporter, personaName, isPersonaLocked, onOpenPe
             type="button"
             onClick={onOpenPersona}
             disabled={isPersonaLocked}
-            title={isPersonaLocked ? "รอ Soulom ตอบให้เสร็จก่อนนะ" : undefined}
+            title={isPersonaLocked ? t.header.personaLocked : undefined}
             className="flex min-w-0 items-center gap-1 rounded-full border border-line px-2.5 py-1 text-xs text-cream-soft transition-colors hover:border-line-strong hover:text-cream disabled:opacity-50"
-            aria-label={`บุคลิก: ${personaName} (กดเพื่อเปลี่ยน)`}
+            aria-label={t.header.personaAria(personaName)}
           >
             <span className="truncate">{personaName}</span>
             <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true" className="shrink-0 opacity-70">
@@ -30,22 +40,31 @@ export function ChatHeader({ isSupporter, personaName, isPersonaLocked, onOpenPe
             </svg>
           </button>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex shrink-0 items-center gap-0.5">
+          <button
+            type="button"
+            onClick={() => setLanguage(language === "th" ? "en" : "th")}
+            className="rounded-full px-2.5 py-2 text-xs font-medium text-muted transition-colors hover:bg-ink-raised hover:text-cream"
+            aria-label={t.header.languageAria}
+            title={t.header.languageAria}
+          >
+            {t.header.languageButton}
+          </button>
           <button
             type="button"
             onClick={onOpenKeepsake}
-            className="flex items-center gap-2 rounded-full px-3 py-2 text-sm text-muted transition-colors hover:bg-ink-raised hover:text-cream"
-            aria-label="ความทรงจำ: เก็บหรือกู้คืนไฟล์ .soulom"
+            className="flex items-center gap-2 rounded-full px-2.5 py-2 text-sm text-muted transition-colors hover:bg-ink-raised hover:text-cream"
+            aria-label={t.header.keepsakeAria}
           >
             <KeepsakeIcon width={18} height={18} />
-            <span className="hidden sm:inline">ความทรงจำ</span>
+            <span className="hidden sm:inline">{t.header.keepsake}</span>
           </button>
           <button
             type="button"
             onClick={onOpenSupporter}
             className="relative rounded-full p-2 text-muted transition-colors hover:bg-ink-raised hover:text-ember"
-            aria-label={isSupporter ? "สนับสนุน (คุณเป็นผู้สนับสนุนแล้ว)" : "สนับสนุน"}
-            title="สนับสนุน"
+            aria-label={isSupporter ? t.header.supportActiveAria : t.header.support}
+            title={t.header.support}
           >
             <HeartIcon width={18} height={18} />
             {isSupporter && <span className="absolute top-1.5 right-1.5 size-1.5 rounded-full bg-sage" />}
