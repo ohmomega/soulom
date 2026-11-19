@@ -1,161 +1,219 @@
 # Soulom Launch Kit
 
-ชุดนี้มีทุกอย่างที่ต้องใช้ตอนลง itch.io และ Product Hunt: ข้อความพร้อมก๊อปวาง รูป และขั้นตอนทีละข้อ
-ภาพทั้งหมดอยู่ในโฟลเดอร์เดียวกับไฟล์นี้ (`docs/launch/`)
+ชุดนี้มีข้อความพร้อมก๊อปวาง รูป และขั้นตอนทีละข้อ สำหรับ Ko-fi, itch.io, Product Hunt และโพสต์ให้เพื่อน
+รูปทั้งหมดอยู่ในโฟลเดอร์เดียวกับไฟล์นี้ (`docs/launch/`)
+
+**ก่อนโพสต์ แก้คำให้เป็นสำนวนตัวเองได้เต็มที่** ยิ่งเป็นคำของคุณเอง ยิ่งอ่านแล้วเหมือนคนจริง
+ถ้าตรงไหนไม่ใช่เรื่องจริงของคุณ ให้ลบทิ้ง อย่าโพสต์ไปทั้งอย่างนั้น
 
 | ไฟล์ | ขนาด | ใช้ที่ไหน |
 | --- | --- | --- |
+| `kofi-banner.png` | 1500×500 | Ko-fi → รูปปก (Cover image) |
 | `itch-cover.png` | 630×500 | itch.io → Cover image |
 | `itch-shot-chat.png`, `itch-shot-guide.png` | 600×860 | itch.io → Screenshots |
-| `ph-1-chat-th.png`, `ph-2-chat-en.png`, `ph-3-guide-th.png` | 1270×760 | Product Hunt → Gallery |
-| `../../public/icons/icon-512.png` | 512×512 | Product Hunt → Thumbnail / itch.io icon |
-| `og.png` | 1200×630 | รูปตอนแชร์ลิงก์ (ใส่ในเว็บแล้ว) |
+| `ph-1-chat-th.png`, `ph-2-chat-en.png`, `ph-3-guide-th.png` | 1270×760 | Product Hunt → Gallery และใช้โพสต์ Facebook ได้ด้วย |
+| `../../public/icons/icon-512.png` | 512×512 | รูปโปรไฟล์ Ko-fi / Product Hunt thumbnail |
+| `og.png` | 1200×630 | รูปที่ขึ้นตอนแชร์ลิงก์ (ใส่ในเว็บแล้ว ไม่ต้องทำอะไร) |
+
+ลิงก์ที่ใช้บ่อย
+- เว็บ: https://soulom.pages.dev
+- โค้ด: https://github.com/ohmomega/soulom
+- Ko-fi: https://ko-fi.com/ohmomega
 
 ---
 
-## Soulom คืออะไร (ใช้อธิบายสั้นๆ ได้ทุกที่)
+## 0. ตกแต่งเพจ Ko-fi (ทำก่อน เพราะทุกที่จะลิงก์มาที่นี่)
 
-- **หมวด:** AI Companion (เพื่อนคุย/รับฟัง) · Wellbeing (สุขภาวะทางใจ) · Web app / PWA
-- **ประโยคเดียว (TH):** เพื่อนคุย AI ตอนกลางคืน ที่ฟังจริง ไม่ตัดสิน
-- **One line (EN):** A Thai-first AI companion that listens, not lectures
-- **ลิงก์หลัก:** https://soulom.pages.dev
-- **โค้ด:** https://github.com/ohmomega/soulom
+ที่ **Settings → Profile**
+- **Display name:** `Soulom` หรือ `ohmomega · Soulom`
+- **Profile picture:** `icon-512.png`
+- **Cover image:** `kofi-banner.png`
+- **About** (ก๊อปได้เลย แก้ให้เป็นสำนวนตัวเองก็ได้):
+
+```
+ผมทำ Soulom เป็นเพื่อนคุย AI ภาษาไทย ไว้คุยตอนดึกที่ไม่อยากปลุกใคร
+ใช้ฟรี ไม่ต้องสมัคร ไม่มีโฆษณา
+
+ค่าเซิร์ฟเวอร์กับค่า AI ผมจ่ายเองทุกเดือน ถ้า Soulom เคยช่วยให้คืนไหนผ่านไปได้ง่ายขึ้น
+เลี้ยงกาแฟสักแก้วก็ช่วยให้มันเปิดต่อไปได้ครับ ขอบคุณมาก
+
+I make Soulom, a free AI you can talk to late at night (Thai first, English too).
+No ads, no sign-up. Coffees go straight to server costs. Thank you!
+
+ลองใช้: https://soulom.pages.dev
+```
+
+- **Goal (ไม่บังคับ):** ตั้งเป้าเล็กๆ ที่เป็นเรื่องจริง เช่น `ค่าโดเมน soulom.app 1 ปี` ประมาณ 15 ดอลลาร์
+  เป้าที่จับต้องได้ ทำให้คนอยากช่วยมากกว่าการขอเงินลอยๆ
+- **Button text:** เปลี่ยนจาก "Support" เป็น `เลี้ยงกาแฟ` หรือ `Buy Soulom a coffee`
 
 ---
 
-## 1. itch.io
+## 1. โพสต์ให้คนรู้จัก (ทำวันเดียวกับที่ลง itch / Product Hunt ก็ได้)
+
+### Facebook / IG (แนบรูป `ph-1-chat-th.png`)
+
+```
+ช่วงนี้นั่งทำเว็บเล็กๆ ชื่อ Soulom ครับ
+เป็น AI ไว้คุยตอนดึกๆ ที่มีเรื่องอยากเล่า แต่ไม่อยากทักใครตอนตีสอง
+
+มันไม่ได้ฉลาดรอบรู้ทุกอย่างนะ ค้นเน็ตก็ไม่ได้ แต่ฟังเก่ง ถามต่อ แล้วก็จำได้ว่าเราเคยเล่าอะไรไว้
+เลือกได้ว่าจะให้มันคุยแบบเพื่อน แบบพี่สาว หรือแบบสุภาพๆ
+
+ฟรี ไม่ต้องสมัคร แชทเก็บอยู่ในเครื่องเราเอง
+ลองเล่นแล้วบอกหน่อยว่าตรงไหนแปลกๆ หรือไม่ชอบ อยากรู้จริงๆ
+👉 soulom.pages.dev
+```
+
+### LINE (ส่งให้เพื่อนสนิท / กลุ่ม)
+
+```
+เฮ้ย ช่วยลองอันนี้ให้หน่อย ทำเองนะ 555
+soulom.pages.dev
+เป็น AI ไว้คุยตอนนอนไม่หลับ ไม่ต้องสมัคร ลองพิมพ์อะไรก็ได้แล้วบอกว่ามันตอบแปลกไหม
+```
+
+### X / Threads
+
+```
+ทำเว็บเล็กๆ ไว้คุยกับ AI ตอนดึก ภาษาไทย ไม่ต้องสมัคร แชทไม่ขึ้นเซิร์ฟเวอร์
+มันฟังแล้วก็จำได้ว่าเราเล่าอะไรไว้ ลองแล้วติได้เลยครับ
+soulom.pages.dev
+```
+
+> แนะนำให้ขอ "คำติ" มากกว่าขอ "ช่วยแชร์" เพราะคนจะลองจริง แล้วคุณก็จะได้รู้ด้วยว่าต้องแก้ตรงไหน
+
+---
+
+## 2. itch.io
 
 ### ต้องทำเอง (ผมทำแทนไม่ได้ เพราะต้องล็อกอินบัญชีของคุณ)
-1. สมัคร https://itch.io (มุมขวาบน Register) แล้วยืนยันอีเมล
+1. สมัคร https://itch.io แล้วยืนยันอีเมล
 2. กดรูปโปรไฟล์ → **Upload new project**
-3. กรอกตามตารางด้านล่าง → กด **Save** (ตั้งเป็น Draft ก่อน ดูหน้าตาแล้วค่อยเปลี่ยนเป็น Public)
+3. กรอกตามตาราง → **Save** เป็น Draft ก่อน ดูหน้าตาแล้วค่อยเปลี่ยนเป็น Public
 
 | ช่อง | ใส่อะไร |
 | --- | --- |
-| Title | `Soulom – AI companion that listens` |
+| Title | `Soulom` |
 | Project URL | `soulom` |
-| Short description or tagline | `A Thai-first AI companion for lonely, sleepless nights. Free, no sign-up.` |
-| Classification | **Tools** (ถ้าไม่ชอบเลือก **Other** ก็ได้) |
-| Kind of project | **Downloadable** แล้ว **ไม่ต้องอัปโหลดไฟล์** (เราใส่ลิงก์ไปเว็บแทน) |
+| Short description or tagline | `Someone to talk to when everyone's asleep. Thai + English, free, no sign-up.` |
+| Classification | **Tools** (หรือ **Other**) |
+| Kind of project | **Downloadable** แต่ไม่ต้องอัปไฟล์ เพราะเราลิงก์ไปที่เว็บแทน |
 | Release status | **Released** |
 | Pricing | **No payments** |
 | Description | ก๊อปจาก "itch.io Description" ด้านล่าง |
-| Genre | ปล่อยว่าง หรือเลือกที่ใกล้สุด |
-| Tags | `ai`, `chatbot`, `companion`, `mental-health`, `wellbeing`, `relaxing`, `cozy`, `thai`, `pwa`, `web` |
-| AI generation disclosure | เลือกว่า **ใช้ Generative AI** → ติ๊ก **Text** (ต้องบอกตามจริง เพราะคำตอบมาจาก AI) |
-| Links | `https://soulom.pages.dev` (Play / Website) และ `https://github.com/ohmomega/soulom` (Source code) |
+| Tags | `ai`, `chatbot`, `companion`, `mental-health`, `relaxing`, `cozy`, `thai`, `pwa` |
+| AI generation disclosure | เลือกว่า**ใช้ AI** แล้วติ๊ก **Text** เพราะคำตอบมาจาก AI ต้องบอกตามจริง |
+| Links | `https://soulom.pages.dev`, `https://github.com/ohmomega/soulom`, `https://ko-fi.com/ohmomega` |
 | Cover image | `itch-cover.png` |
 | Screenshots | `itch-shot-chat.png`, `itch-shot-guide.png`, `ph-2-chat-en.png` |
-| Visibility | Draft → ดูหน้าแล้วค่อยเปลี่ยนเป็น **Public** |
 
-> ทำไมไม่อัปโหลดเป็น HTML ให้เล่นในหน้า itch? เพราะ Soulom ต้องคุยกับเซิร์ฟเวอร์ของเรา (`/api`) และแชทเก็บในเบราว์เซอร์
-> ถ้าเปิดผ่านกรอบของ itch แชทจะแยกกับตอนเปิดเว็บตรงๆ และอาจหายง่าย ส่งคนไปที่เว็บจริงดีกว่า
+> ทำไมไม่อัปเป็น HTML ให้เล่นในหน้า itch? เพราะถ้าเปิดผ่านกรอบของ itch แชทจะเก็บแยกจากตอนเปิดเว็บตรงๆ และหายง่าย
+> ส่งคนไปที่เว็บจริงดีกว่า
 
-### itch.io Description (ก๊อปทั้งก้อน)
+### itch.io Description
 
 ```
-🌙 Soulom (โซลอม) – a late-night companion that actually listens
+Open Soulom → https://soulom.pages.dev
+(runs in your browser, phone or computer, nothing to download)
 
-▶ OPEN SOULOM: https://soulom.pages.dev
-(works in any phone or computer browser, no download)
+Soulom is an AI you can talk to late at night, when you've got something on your mind
+and don't want to wake anyone up. It's made for Thai speakers first, and it speaks English too.
 
-Soulom is a free, Thai-first AI listening companion for lonely or sleepless nights.
-It doesn't lecture or try to fix you. It listens, asks gentle follow-up questions,
-and remembers what you've shared.
+It won't lecture you or rush to fix things. It listens, asks one question at a time,
+and next time you come back it still remembers what you talked about.
 
-WHAT IT DOES
-✓ Chat instantly – no account, no login, no ads
-✓ 3 personalities: Close friend · Kind older sister · Polite listener
-✓ Remembers your story with a short memory note kept on your device
-✓ Your chats stay on your device; back them up as a .soulom file (optional password)
-✓ Installs like an app (Add to Home Screen on Android / iPhone)
-✓ Thai and English
+- Pick how it talks: close friend, kind older sister, or polite listener
+- No account, no ads
+- Your chats are saved on your device, not on a server. Export them to a .soulom file
+  (with a password if you like) to move phones
+- Add it to your home screen and it works like an app
+- Free, with a daily message limit
 
-WHAT IT CAN'T DO (YET)
-✕ Search the internet, so facts like titles or prices may be wrong
-✕ See images, hear audio or open links
-✕ Replace a therapist or doctor. If you're in danger, in Thailand call 1323 (free, 24/7) or 1669
+What it can't do: it can't search the web, so movie titles, prices or news may be wrong.
+It can't see images or hear audio. And it isn't a therapist. If you're in danger in Thailand,
+call 1323 (free, 24 hours) or 1669.
 
-Free daily messages. Optional supporter plan coming later.
-
+Made by one person. If it helps you, you can buy me a coffee: https://ko-fi.com/ohmomega
 Source code: https://github.com/ohmomega/soulom
 
----
+----
 
-🌙 Soulom – เพื่อนคุย AI ตอนกลางคืน ที่ฟังจริง ไม่ตัดสิน
-เปิดใช้เลย: https://soulom.pages.dev
-ฟรี ไม่ต้องสมัคร แชทเก็บในเครื่องคุณเท่านั้น ไม่มีโฆษณา
+Soulom เพื่อนคุย AI ภาษาไทย ไว้คุยตอนดึกที่ไม่อยากปลุกใคร
+เปิดเว็บแล้วพิมพ์ได้เลย ฟรี ไม่ต้องสมัคร แชทอยู่ในเครื่องคุณ
+https://soulom.pages.dev
 ```
 
 ---
 
-## 2. Product Hunt
+## 3. Product Hunt
 
 ### ต้องทำเอง
-1. สมัคร https://www.producthunt.com (ใช้ Google หรือ X ได้) แล้วกรอกโปรไฟล์ให้ครบ ใส่รูปและชื่อจริงหรือชื่อเล่น
-2. **ก่อนวันลง 1–2 สัปดาห์** ให้ใช้บัญชีปกติ เช่น กดโหวตหรือคอมเมนต์โปรดักต์อื่นบ้าง บัญชีที่ว่างเปล่ามักไม่ค่อยมีคนเห็น
-   ถ้าเจอข้อความว่าบัญชียังโพสต์ไม่ได้ ให้รอตามที่เว็บบอก
-3. กด **Submit** → **Launch a product** → ใส่ลิงก์ `https://soulom.pages.dev`
-4. กรอกตามตารางด้านล่าง แล้วเลือกวันลง
-5. **วันลง:** Product Hunt เริ่มนับวันใหม่ตอน 00:01 เวลาซานฟรานซิสโก = **ประมาณ 15:01 น. เวลาไทย** (ช่วงพฤศจิกายน–มีนาคม)
-   ช่วงที่เหลือของปีจะเป็นประมาณ 14:01 น. ตั้งเวลาลงไว้ล่วงหน้าได้ และให้ว่างตอบคอมเมนต์ช่วงนั้น
-6. ทันทีที่โพสต์ขึ้น ให้โพสต์ **Maker comment** ด้านล่างเป็นคอมเมนต์แรก แล้วแชร์ลิงก์ให้เพื่อน
-   ขอให้เพื่อน "ลองใช้แล้วคอมเมนต์" ไม่ใช่แค่ "ช่วยโหวต" เพราะ Product Hunt ไม่ชอบการขอโหวตตรงๆ
+1. สมัคร https://www.producthunt.com (ใช้ Google หรือ X ได้) แล้วกรอกโปรไฟล์ให้ครบ ใส่รูปด้วย
+2. **ก่อนวันลง 1–2 สัปดาห์** ให้ใช้บัญชีปกติ เช่น โหวตหรือคอมเมนต์โปรดักต์อื่นบ้าง บัญชีที่ว่างเปล่ามักไม่ค่อยมีคนเห็น
+   ถ้าเว็บบอกว่าบัญชียังโพสต์ไม่ได้ ให้รอตามที่บอก
+3. **Submit** → **Launch a product** → ใส่ `https://soulom.pages.dev`
+4. กรอกตามตาราง แล้วเลือกวันลง
+5. **เวลาลง:** Product Hunt เริ่มวันใหม่ตอนเที่ยงคืนเวลาซานฟรานซิสโก
+   ช่วงพฤศจิกายน–มีนาคมคือประมาณ **15:00 น.** เวลาไทย ช่วงที่เหลือของปีประมาณ **14:00 น.**
+   วันนั้นให้ว่างตอบคอมเมนต์สักสองสามชั่วโมง
+6. พอโพสต์ขึ้นแล้ว ให้ลง **Maker comment** ด้านล่างเป็นคอมเมนต์แรก แล้วค่อยส่งลิงก์ให้เพื่อน
+   ขอให้เพื่อน "ลองแล้วคอมเมนต์ตามจริง" อย่าขอแค่ "ช่วยโหวต" เพราะ Product Hunt ไม่ชอบการขอโหวตตรงๆ
 
 | ช่อง | ใส่อะไร |
 | --- | --- |
 | Name | `Soulom` |
-| Tagline (≤60 ตัวอักษร) | `A Thai-first AI companion that listens, not lectures` |
-| Links | `https://soulom.pages.dev` + GitHub `https://github.com/ohmomega/soulom` |
-| Topics | `Artificial Intelligence`, `Health & Fitness` (หรือ `Mental Health` ถ้ามี), `Productivity` หรือ `Open Source` |
-| Description | ก๊อปจาก "PH Description" ด้านล่าง |
-| Thumbnail | `public/icons/icon-512.png` |
+| Tagline (≤60 ตัวอักษร) | `Someone to talk to when everyone's asleep` |
+| Links | `https://soulom.pages.dev` + `https://github.com/ohmomega/soulom` |
+| Topics | `Artificial Intelligence`, `Health & Fitness` (ถ้ามี `Mental Health` ให้เลือกอันนี้แทน), `Open Source` |
+| Description | ก๊อปจาก "PH Description" |
+| Thumbnail | `icon-512.png` |
 | Gallery | `ph-1-chat-th.png`, `ph-2-chat-en.png`, `ph-3-guide-th.png` |
-| Pricing | **Free** (ถ้ามีระบบผู้สนับสนุนแล้วค่อยเปลี่ยนเป็น Free Options) |
-| Makers | ใส่ตัวคุณเอง (ติ๊ก I worked on this product) |
-| Shoutouts / AI | ระบุว่าใช้ Google Gemini |
+| Pricing | **Free** |
+| Makers | ใส่ตัวคุณเอง |
 
 ### PH Description
 
 ```
-Soulom is a free, Thai-first AI listening companion for lonely or sleepless nights.
-It listens without judging, asks one gentle question at a time, and remembers what
-you've shared. No account, no ads, and your chats never leave your device.
-Pick a personality (friend, kind sister, polite listener), chat in Thai or English,
-and install it like an app.
+An AI to talk to late at night, made for Thai speakers first (English works too).
+No account, no ads, and your chats stay on your device. It listens, asks one question
+at a time, and remembers what you told it last time. Three personalities to pick from.
 ```
 
-### Maker comment (คอมเมนต์แรก)
+### Maker comment
+
+แก้ประโยคแรกให้เป็นเหตุผลจริงของคุณว่าทำไมถึงทำ Soulom ถ้าใช้ประโยคตัวอย่างนี้แล้วไม่ใช่เรื่องจริง ให้เปลี่ยน
 
 ```
-Hi Product Hunt 👋
+Hey everyone,
 
-I built Soulom because a lot of people in Thailand have nobody to talk to at 2am,
-and most AI chatbots answer like a search engine or a lecturer. I wanted one that
-just listens.
+I made Soulom for those nights when you want to talk something through but it's 2am
+and you don't want to message anyone.
 
-What makes it different:
-• Thai-first: it speaks natural Thai in 3 personalities (it also speaks English)
-• Private by design: no account, and chats are stored only in your browser.
-  You can export them as a password-protected .soulom file
-• Remembers you: a short memory note, so it can ask "how did the interview go?"
-• Safety: if someone seems at risk, it gently points to Thailand's 1323 / 1669 hotlines
+It's Thai first because most chatbots still sound stiff in Thai. You can pick how it talks
+(close friend, kind older sister, or polite), and it keeps a short memory note so next time
+it can ask how the interview went.
 
-It's free (daily message limit), open source, and runs on Cloudflare + Gemini.
-I'd love feedback, especially on how the replies feel. Thank you for trying it!
+A few things I care about:
+- No account. Chats are saved in your browser, not on my server
+- If someone seems to be in danger, it gently points to Thailand's 1323 / 1669 hotlines
+- It's open source, if you want to see how it works
+
+It can't search the web yet, so it sometimes gets facts wrong. I'd really like to hear
+where the replies feel off. Thanks for trying it.
 ```
 
 ---
 
-## 3. ให้ Google เจอ Soulom
+## 4. ให้ Google เจอ Soulom
 
-ผมใส่ข้อมูลที่ Google และโซเชียลอ่านไว้ในเว็บแล้ว ได้แก่ ชื่อเว็บ คำอธิบาย รูปตอนแชร์ลิงก์ `robots.txt` และ `sitemap.xml`
-ที่เหลือคุณต้องทำเอง เพราะต้องล็อกอินด้วยบัญชี Google:
+ผมใส่ข้อมูลที่ Google อ่านไว้ในเว็บแล้ว ได้แก่ ชื่อเว็บ คำอธิบาย รูปตอนแชร์ลิงก์ `robots.txt` และ `sitemap.xml`
+ที่เหลือคุณต้องทำเอง เพราะต้องล็อกอินด้วยบัญชี Google
 
-1. เข้า https://search.google.com/search-console → **Add property** → เลือก **URL prefix** → ใส่ `https://soulom.pages.dev/`
-2. วิธียืนยัน: เลือก **HTML tag** → ก๊อปบรรทัด `<meta name="google-site-verification" ...>` มาให้ผม ผมจะใส่ในเว็บแล้ว deploy ให้
-3. พอยืนยันได้แล้ว ไปที่เมนู **Sitemaps** → ใส่ `sitemap.xml` → Submit
+1. เข้า https://search.google.com/search-console → **Add property** → **URL prefix** → ใส่ `https://soulom.pages.dev/`
+2. วิธียืนยันเลือก **HTML tag** → ก๊อปบรรทัด `<meta name="google-site-verification" ...>` มาให้ผม ผมจะใส่ในเว็บแล้ว deploy ให้
+3. พอยืนยันได้แล้ว ไปเมนู **Sitemaps** → ใส่ `sitemap.xml` → Submit
 4. เมนู **URL inspection** → ใส่ `https://soulom.pages.dev/` → **Request indexing**
-5. (ไม่บังคับ) ทำแบบเดียวกันที่ https://www.bing.com/webmasters ซึ่งนำเข้าจาก Google Search Console ได้ในคลิกเดียว
+5. (ไม่บังคับ) https://www.bing.com/webmasters นำเข้าจาก Google Search Console ได้ในคลิกเดียว
 
 ปกติ Google ใช้เวลาหลายวันถึงสองสามสัปดาห์กว่าจะเริ่มแสดงเว็บ

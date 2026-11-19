@@ -5,45 +5,46 @@
 <h1 align="center">Soulom (โซลอม)</h1>
 
 <p align="center">
-  <b>เพื่อนคุย AI ตอนกลางคืน ที่ฟังจริง ไม่ตัดสิน</b><br />
-  A Thai-first AI companion for lonely or sleepless nights
+  มีเรื่องอยากเล่า แต่ไม่อยากปลุกใคร<br />
+  <sub>For the nights you need to talk.</sub>
 </p>
 
 <p align="center">
-  <a href="https://soulom.pages.dev"><b>▶ เปิดใช้งานเลย / Try it: soulom.pages.dev</b></a>
+  <a href="https://soulom.pages.dev"><b>เปิด Soulom → soulom.pages.dev</b></a>
+  &nbsp;·&nbsp;
+  <a href="https://ko-fi.com/ohmomega">เลี้ยงกาแฟคนทำ</a>
   <!-- LAUNCH-LINKS: add itch.io / Product Hunt links here after posting -->
 </p>
 
 <p align="center">
-  <img src="docs/launch/ph-1-chat-th.png" width="820" alt="Soulom chat screenshot" />
+  <img src="docs/launch/ph-1-chat-th.png" width="820" alt="หน้าแชทของ Soulom" />
 </p>
 
-## Soulom คืออะไร
+Soulom เป็นเพื่อนคุย AI ภาษาไทย ไว้คุยตอนดึกที่คนอื่นหลับกันหมดแล้ว
+เปิดเว็บแล้วพิมพ์ได้เลย ไม่ต้องสมัคร ไม่ต้องล็อกอิน Soulom จะไม่สั่งสอน และไม่รีบแก้ปัญหาให้ แค่ฟังแล้วถามต่อทีละเรื่อง
+ครั้งหน้ากลับมาก็ยังจำได้ว่าคุยอะไรกันไว้
 
-**หมวด:** แอปเพื่อนคุย / รับฟัง (AI Companion) · สุขภาวะทางใจ (Wellbeing) · เว็บแอปติดตั้งลงมือถือได้ (PWA)
+**เป็นแอปประเภทไหน:** เพื่อนคุย / AI companion, เรื่องใจ (wellbeing), เว็บที่ติดตั้งลงมือถือได้ (PWA)
 
-Soulom เป็นเพื่อนคุยที่พร้อมฟังตอนที่เหงา เครียด หรือนอนไม่หลับ ไม่ได้มาสอน ไม่ได้มาแก้ปัญหาให้ แค่ฟัง ถามต่อ และจำเรื่องที่คุณเคยเล่าไว้
+- เลือกนิสัยได้ 3 แบบ: เพื่อนสนิท พี่ใจดี หรือผู้ฟังสุภาพ
+- แชทเก็บอยู่ในเครื่องคุณเท่านั้น ไม่มีฐานข้อมูลเก็บแชทบนเซิร์ฟเวอร์ ถ้าจะย้ายเครื่องก็สำรองเป็นไฟล์ `.soulom` (ใส่รหัสผ่านได้)
+- กด "เพิ่มลงหน้าจอหลัก" แล้วใช้เหมือนแอปทั่วไป ได้ทั้ง Android และ iPhone
+- สลับไทย / อังกฤษได้
+- ฟรี มีโควตาข้อความต่อวัน ไม่มีโฆษณา
 
-| | |
-| --- | --- |
-| 💬 **คุยได้ทันที** | เปิดเว็บแล้วพิมพ์เลย ไม่ต้องสมัคร ไม่ต้องล็อกอิน |
-| 🎭 **3 บุคลิก** | เพื่อนสนิท · พี่ใจดี · ผู้ฟังสุภาพ เปลี่ยนได้ทุกเมื่อ |
-| 🧠 **จำเรื่องที่เล่า** | สรุปเรื่องสำคัญเป็นโน้ตความจำสั้นๆ ในเครื่องคุณ |
-| 🔒 **แชทอยู่ในเครื่องคุณ** | ไม่มีฐานข้อมูลเก็บแชท สำรอง/ย้ายเครื่องด้วยไฟล์ `.soulom` (ตั้งรหัสผ่านได้) |
-| 📱 **ติดตั้งเหมือนแอป** | กด "เพิ่มลงหน้าจอหลัก" ได้ทั้ง Android และ iPhone |
-| 🌏 **ไทย / English** | สลับภาษาได้ที่ปุ่มบนหัวแอป |
-| ☎ **ปลอดภัยไว้ก่อน** | ถ้ามีสัญญาณเสี่ยง จะแนะนำสายด่วน 1323 / 1669 เสมอ |
+ยังทำไม่ได้: ค้นเน็ต (เพราะฉะนั้นชื่อหนัง ราคา หรือข่าว อาจผิดได้) ดูรูป หรือฟังเสียง
+และ Soulom ไม่ใช่หมอหรือนักบำบัด ถ้าเรื่องหนักจนไม่ไหว โทร 1323 ได้ฟรีตลอด 24 ชั่วโมง หรือ 1669 ถ้าฉุกเฉิน
 
-**ยังทำไม่ได้:** ค้นอินเทอร์เน็ต (ข้อเท็จจริงอาจผิดได้) ดูรูป/ฟังเสียง และไม่ใช่นักบำบัดหรือแพทย์
+### In English
 
-## What is Soulom? (English)
+Soulom is a free AI you can talk to late at night, made for Thai speakers first (it speaks English too).
+Open the site and start typing. There's no account and no ads, and your chats are stored only on your device.
+It won't lecture you. It listens, asks one question at a time, and remembers what you told it last time.
+It's not therapy. If someone seems to be in danger, it points them to Thailand's 1323 and 1669 hotlines.
 
-Soulom is a free, Thai-first AI listening companion that runs in your browser and installs like an app.
-It listens without judging, asks gentle follow-up questions and remembers what you shared, with three
-personalities to choose from. There's no account and no ads, and your chats are stored only on your device.
-It isn't therapy: if someone seems at risk, it always points to Thailand's 1323 / 1669 hotlines.
+Built with React, Vite, TypeScript, Tailwind, Cloudflare Pages Functions and Google Gemini.
 
-**Built with:** React · Vite · TypeScript · Tailwind CSS · Cloudflare Pages Functions · Google Gemini
+ชอบ Soulom และอยากช่วยค่าเซิร์ฟเวอร์ → [ko-fi.com/ohmomega](https://ko-fi.com/ohmomega)
 
 ---
 
