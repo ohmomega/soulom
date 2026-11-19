@@ -54,7 +54,7 @@ const th = {
     retry: "ส่งอีกครั้ง",
     quotaExceeded: "วันนี้คุยกันครบโควตาฟรีแล้วนะ",
     quotaResetsAt: (time: string, countdown: string) => `โควตาจะกลับมาตอน ${time} (อีก ${countdown}) แล้วมาคุยกันต่อนะ`,
-    quotaSupport: "ถ้าอยากคุยต่อตอนนี้ แวะดูที่ปุ่มหัวใจมุมขวาบนได้ เป็นการช่วยค่าเซิร์ฟเวอร์ให้ Soulom อยู่ต่อไปด้วย",
+    quotaSupport: "ถ้าอยากช่วยค่าเซิร์ฟเวอร์ให้ Soulom อยู่ต่อไป แวะดูที่ปุ่มหัวใจมุมขวาบนได้นะ",
     openSupport: "เปิดพื้นที่สนับสนุน",
     storageFull: "พื้นที่เก็บข้อมูลในเบราว์เซอร์เต็มแล้ว ลองเก็บความทรงจำเป็นไฟล์ .soulom แล้วล้างแชทเก่าออกนะ",
   },
@@ -308,7 +308,7 @@ const en: Strings = {
     quotaExceeded: "That's all of today's free messages.",
     quotaResetsAt: (time, countdown) => `They come back at ${time} (in ${countdown}). Let's talk again then.`,
     quotaSupport:
-      "If you'd like to keep talking now, tap the heart at the top right. It helps cover the server costs that keep Soulom running.",
+      "If you'd like to help cover the server costs that keep Soulom running, tap the heart at the top right.",
     openSupport: "Open the support space",
     storageFull:
       "This browser's storage is full. Save your memories as a .soulom file, then clear old chats.",
