@@ -8,11 +8,10 @@
 
 | ไฟล์ | ขนาด | ใช้ที่ไหน |
 | --- | --- | --- |
-| `kofi-banner.png` | 1500×500 | Ko-fi → รูปปก (Cover image) |
 | `itch-cover.png` | 630×500 | itch.io → Cover image |
 | `itch-shot-chat.png`, `itch-shot-guide.png` | 600×860 | itch.io → Screenshots |
 | `ph-1-chat-th.png`, `ph-2-chat-en.png`, `ph-3-guide-th.png` | 1270×760 | Product Hunt → Gallery และใช้โพสต์ Facebook ได้ด้วย |
-| `../../public/icons/icon-512.png` | 512×512 | รูปโปรไฟล์ Ko-fi / Product Hunt thumbnail |
+| `../../public/icons/icon-512.png` | 512×512 | Product Hunt thumbnail |
 | `og.png` | 1200×630 | รูปที่ขึ้นตอนแชร์ลิงก์ (ใส่ในเว็บแล้ว ไม่ต้องทำอะไร) |
 
 ลิงก์ที่ใช้บ่อย
@@ -22,30 +21,10 @@
 
 ---
 
-## 0. ตกแต่งเพจ Ko-fi (ทำก่อน เพราะทุกที่จะลิงก์มาที่นี่)
+## 0. ตกแต่งเพจ Ko-fi (แบรนด์ ohmomega)
 
-ที่ **Settings → Profile**
-- **Display name:** `Soulom` หรือ `ohmomega · Soulom`
-- **Profile picture:** `icon-512.png`
-- **Cover image:** `kofi-banner.png`
-- **About** (ก๊อปได้เลย แก้ให้เป็นสำนวนตัวเองก็ได้):
-
-```
-ผมทำ Soulom เป็นเพื่อนคุย AI ภาษาไทย ไว้คุยตอนดึกที่ไม่อยากปลุกใคร
-ใช้ฟรี ไม่ต้องสมัคร ไม่มีโฆษณา
-
-ค่าเซิร์ฟเวอร์กับค่า AI ผมจ่ายเองทุกเดือน ถ้า Soulom เคยช่วยให้คืนไหนผ่านไปได้ง่ายขึ้น
-เลี้ยงกาแฟสักแก้วก็ช่วยให้มันเปิดต่อไปได้ครับ ขอบคุณมาก
-
-I make Soulom, a free AI you can talk to late at night (Thai first, English too).
-No ads, no sign-up. Coffees go straight to server costs. Thank you!
-
-ลองใช้: https://soulom.pages.dev
-```
-
-- **Goal (ไม่บังคับ):** ตั้งเป้าเล็กๆ ที่เป็นเรื่องจริง เช่น `ค่าโดเมน soulom.app 1 ปี` ประมาณ 15 ดอลลาร์
-  เป้าที่จับต้องได้ ทำให้คนอยากช่วยมากกว่าการขอเงินลอยๆ
-- **Button text:** เปลี่ยนจาก "Support" เป็น `เลี้ยงกาแฟ` หรือ `Buy Soulom a coffee`
+เพจ Ko-fi ใช้ชื่อแบรนด์ **ohmomega** ไม่ต้องใช้ชื่อแอป วันหลังมีแอปใหม่ก็ใช้เพจเดิมได้
+รูปโปรไฟล์ รูปปก และข้อความ About อยู่ที่โฟลเดอร์ `D:/for app/ohmomega-brand/` (เปิด README.md ในโฟลเดอร์นั้น)
 
 ---
 
