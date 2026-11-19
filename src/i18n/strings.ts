@@ -1,5 +1,11 @@
 import type { PersonaId } from "../../shared/personaIds";
 
+export interface GuideSection {
+  tone: "can" | "cannot" | "info" | "help";
+  heading: string;
+  items: string[];
+}
+
 interface PersonaCopy {
   name: string;
   summary: string;
@@ -97,6 +103,50 @@ const th = {
         listening: "เล่าได้ตามสบายเลยครับ ผมรับฟังอยู่",
       },
     } satisfies Record<PersonaId, PersonaCopy>,
+  },
+  guide: {
+    title: "Soulom ทำอะไรได้บ้าง",
+    subtitle: "อ่านสักนิดก่อนคุยกัน จะได้รู้ว่าเรื่องไหนพึ่ง Soulom ได้ เรื่องไหนยังไม่ได้",
+    headerAria: "คู่มือ: Soulom ทำอะไรได้บ้าง",
+    sections: [
+      {
+        tone: "can",
+        heading: "ทำได้",
+        items: [
+          "รับฟังและคุยเป็นเพื่อน ตามบุคลิกที่เลือก เปลี่ยนบุคลิกได้ที่ปุ่มชื่อข้างโลโก้",
+          "จำเรื่องสำคัญที่คุณเคยเล่าไว้ เช่น ชื่อเล่น หรือเรื่องที่ค้างไว้อยากคุยต่อ",
+          "รู้วันที่และเวลาตอนนี้ตามเครื่องของคุณ",
+          "ทักก่อนได้เมื่อคุณกลับมาเปิดแอป (ปิดได้ในหน้าเลือกบุคลิก)",
+          "คุยได้ทั้งภาษาไทยและอังกฤษ",
+        ],
+      },
+      {
+        tone: "cannot",
+        heading: "ยังทำไม่ได้",
+        items: [
+          "ค้นอินเทอร์เน็ต จึงไม่รู้ข่าวหรือของที่เพิ่งออกใหม่",
+          "ข้อมูลอย่างชื่อหนัง ซีรีส์ เพลง ราคา หรือข้อเท็จจริงต่างๆ อาจเก่าหรือผิดได้ เช็กอีกครั้งก่อนใช้จริงนะ",
+          "ดูรูป ฟังเสียง หรือเปิดลิงก์",
+          "Soulom เป็นเพื่อนคุย ไม่ใช่นักบำบัดหรือแพทย์ ไม่วินิจฉัยโรคและไม่แนะนำยา",
+        ],
+      },
+      {
+        tone: "info",
+        heading: "ข้อมูลของคุณ",
+        items: [
+          "แชทเก็บไว้ในเครื่องนี้เท่านั้น ถ้าล้างข้อมูลเบราว์เซอร์จะหายไป สำรองเป็นไฟล์ .soulom ได้ที่ปุ่มความทรงจำ",
+          "ข้อความที่ส่งจะผ่าน AI ของ Google (Gemini) เพื่อสร้างคำตอบ อย่าพิมพ์เลขบัตร รหัสผ่าน หรือข้อมูลการเงิน",
+          "คุยฟรีได้ทุกวันตามโควตา และรีเซ็ตทุกเที่ยงคืน",
+        ],
+      },
+      {
+        tone: "help",
+        heading: "ถ้าเรื่องหนักเกินไป",
+        items: ["โทรสายด่วนสุขภาพจิต 1323 ได้ฟรีตลอด 24 ชั่วโมง หรือ 1669 ถ้าเป็นเหตุฉุกเฉิน"],
+      },
+    ] as GuideSection[],
+    reopenHint: "เปิดหน้านี้อีกได้ที่ปุ่ม ? มุมขวาบน",
+    gotIt: "เข้าใจแล้ว",
   },
   keepsake: {
     title: "ความทรงจำ",
@@ -309,6 +359,52 @@ const en: Strings = {
         listening: "Share whatever you like. I'm here to listen.",
       },
     },
+  },
+  guide: {
+    title: "What Soulom can do",
+    subtitle: "A quick read before you chat, so you know what you can count on Soulom for",
+    headerAria: "Guide: what Soulom can do",
+    sections: [
+      {
+        tone: "can",
+        heading: "Can do",
+        items: [
+          "Listen and chat like a friend in the personality you pick (change it with the name button next to the logo)",
+          "Remember the important things you've shared, like your nickname or a story you want to continue",
+          "Know today's date and time on your device",
+          "Say hi first when you come back to the app (you can turn this off in the personality picker)",
+          "Chat in Thai or English",
+        ],
+      },
+      {
+        tone: "cannot",
+        heading: "Can't do yet",
+        items: [
+          "Search the internet, so it doesn't know recent news or new releases",
+          "Facts like movie, series or song titles and prices may be outdated or wrong, so double-check before relying on them",
+          "See pictures, hear audio or open links",
+          "Soulom is a companion, not a therapist or doctor: it won't diagnose or recommend medication",
+        ],
+      },
+      {
+        tone: "info",
+        heading: "Your data",
+        items: [
+          "Chats stay on this device only. Clearing browser data erases them, so back up a .soulom file from the Memories button",
+          "Messages go through Google's AI (Gemini) to write replies. Don't type card numbers, passwords or financial details",
+          "Free chats come with a daily allowance that resets at midnight (Thailand time)",
+        ],
+      },
+      {
+        tone: "help",
+        heading: "If it gets too heavy",
+        items: [
+          "In Thailand, call the mental health hotline 1323 (free, 24/7) or 1669 for emergencies. Elsewhere, call your local emergency number",
+        ],
+      },
+    ] as GuideSection[],
+    reopenHint: "Open this again with the ? button at the top right",
+    gotIt: "Got it",
   },
   keepsake: {
     title: "Memories",

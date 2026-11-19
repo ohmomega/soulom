@@ -10,6 +10,7 @@ const STORAGE_KEYS = {
   persona: "soulom.persona.v1",
   nudgesEnabled: "soulom.nudges.v1",
   lastNudgeId: "soulom.lastNudge.v1",
+  guideSeen: "soulom.guideSeen.v1",
 } as const;
 
 function readRaw(key: string): string | null {
@@ -108,3 +109,12 @@ export const localVault = {
     writeRaw(STORAGE_KEYS.lastNudgeId, null);
   },
 };
+
+/** Whether the "what Soulom can do" guide was already shown once on this device. */
+export function loadGuideSeen(): boolean {
+  return readRaw(STORAGE_KEYS.guideSeen) === "1";
+}
+
+export function saveGuideSeen(): void {
+  writeRaw(STORAGE_KEYS.guideSeen, "1");
+}

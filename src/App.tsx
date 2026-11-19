@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 import { ChatHeader } from "./components/ChatHeader";
 import { Composer } from "./components/Composer";
 import { CrisisBanner } from "./components/CrisisBanner";
+import { GuideModal } from "./components/GuideModal";
 import { KeepsakeModal } from "./components/memory/KeepsakeModal";
 import { MessageList } from "./components/MessageList";
 import { PersonaModal } from "./components/PersonaModal";
@@ -12,13 +13,15 @@ import { useChatSession } from "./hooks/useChatSession";
 import { useServiceStatus } from "./hooks/useServiceStatus";
 import { useSupporterLicense } from "./hooks/useSupporterLicense";
 import { useI18n } from "./i18n/I18nProvider";
+import { loadGuideSeen, saveGuideSeen } from "./lib/localVault";
 import type { SupporterState } from "./lib/soulomApi";
 
-type OpenPanel = "supporter" | "keepsake" | "persona" | null;
+type OpenPanel = "supporter" | "keepsake" | "persona" | "guide" | null;
 
 export function App() {
   const { t, language } = useI18n();
-  const [openPanel, setOpenPanel] = useState<OpenPanel>(null);
+  // First visit on this device opens the guide once, so people know what Soulom can and can't do.
+  const [openPanel, setOpenPanel] = useState<OpenPanel>(() => (loadGuideSeen() ? null : "guide"));
   const supporter = useSupporterLicense();
   const { reportServerVerdict } = supporter;
   const isSupporter = supporter.health === "active";
@@ -59,7 +62,12 @@ export function App() {
   const openSupporter = useCallback(() => setOpenPanel("supporter"), []);
   const openPersona = useCallback(() => setOpenPanel("persona"), []);
   const openKeepsake = useCallback(() => setOpenPanel("keepsake"), []);
+  const openGuide = useCallback(() => setOpenPanel("guide"), []);
   const closePanel = useCallback(() => setOpenPanel(null), []);
+  const closeGuide = useCallback(() => {
+    saveGuideSeen();
+    setOpenPanel(null);
+  }, []);
 
   return (
     <div className="flex min-h-full flex-col">
@@ -70,6 +78,7 @@ export function App() {
         onOpenPersona={openPersona}
         onOpenKeepsake={openKeepsake}
         onOpenSupporter={openSupporter}
+        onOpenGuide={openGuide}
       />
 
       <ServiceStatusBanner problem={service.problem} onRecheck={recheckService} />
@@ -94,6 +103,7 @@ export function App() {
         onDraftChange={session.noteDraft}
       />
 
+      {openPanel === "guide" && <GuideModal onClose={closeGuide} />}
       {openPanel === "supporter" && <SupporterModal supporter={supporter} onClose={closePanel} />}
       {openPanel === "persona" && (
         <PersonaModal
