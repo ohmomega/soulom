@@ -46,6 +46,14 @@ function readQuota(payload: Record<string, unknown>): QuotaStatus | null {
   };
 }
 
+function deviceTimeZone(): string | undefined {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+  } catch {
+    return undefined;
+  }
+}
+
 async function postJson(path: string, body: unknown, licenseKey: string | null, signal?: AbortSignal) {
   const response = await fetch(path, {
     method: "POST",
@@ -69,7 +77,7 @@ export async function requestCompanionReply(
   try {
     result = await postJson(
       "/api/chat",
-      { mode: "chat", messages: toApiTurns(messages), memoryNote, persona, language },
+      { mode: "chat", messages: toApiTurns(messages), memoryNote, persona, language, timeZone: deviceTimeZone() },
       licenseKey,
       signal,
     );
@@ -127,6 +135,7 @@ export async function requestNudge(
         memoryNote,
         persona,
         language,
+        timeZone: deviceTimeZone(),
       },
       licenseKey,
       signal,

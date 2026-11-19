@@ -20,6 +20,7 @@ import {
   isPersonaId,
   MAX_MEMORY_NOTE_LENGTH,
   NUDGE_PLACEHOLDER_TURN,
+  resolveTimeZone,
   tidyMemoryNote,
   type NudgeContext,
   type PersonaId,
@@ -42,6 +43,7 @@ interface ChatRequest {
   memoryNote: string;
   persona: PersonaId;
   language: Language;
+  timeZone: string;
   nudge?: NudgeContext;
 }
 
@@ -56,6 +58,7 @@ function parseChatRequest(body: unknown): ChatRequest | null {
   const memoryNote = typeof body.memoryNote === "string" ? body.memoryNote.slice(0, MAX_MEMORY_NOTE_LENGTH) : "";
   const persona = isPersonaId(body.persona) ? body.persona : DEFAULT_PERSONA;
   const language = isLanguage(body.language) ? body.language : DEFAULT_LANGUAGE;
+  const timeZone = resolveTimeZone(body.timeZone);
 
   const turns: ConversationTurn[] = [];
   for (const candidate of body.messages.slice(-SLIDING_WINDOW_SIZE)) {
@@ -76,14 +79,14 @@ function parseChatRequest(body: unknown): ChatRequest | null {
       typeof body.awayMinutes === "number" && Number.isFinite(body.awayMinutes)
         ? Math.min(Math.max(Math.round(body.awayMinutes), 0), MAX_AWAY_MINUTES)
         : 0;
-    return { mode, turns: preparedTurns, memoryNote, persona, language, nudge: { kind: body.nudge, awayMinutes } };
+    return { mode, turns: preparedTurns, memoryNote, persona, language, timeZone, nudge: { kind: body.nudge, awayMinutes } };
   }
 
   const preparedTurns = prepareTurnsForGemini(turns);
   if (preparedTurns.length === 0) return null;
   if (mode === "chat" && preparedTurns.at(-1)?.role !== "user") return null;
 
-  return { mode, turns: preparedTurns, memoryNote, persona, language };
+  return { mode, turns: preparedTurns, memoryNote, persona, language, timeZone };
 }
 
 function describeSupporter(verdict: LicenseVerdict | null) {
@@ -114,6 +117,7 @@ function buildGeneration(chatRequest: ChatRequest) {
       chatRequest.persona,
       chatRequest.language,
       chatRequest.nudge,
+      chatRequest.timeZone,
     ),
     turns: chatRequest.turns,
     temperature: chatRequest.mode === "nudge" ? 0.9 : 0.85,
