@@ -1,7 +1,53 @@
-# Soulom
+<p align="center">
+  <img src="public/icons/icon.svg" width="96" alt="Soulom icon" />
+</p>
 
-เพื่อนคุยแก้เหงาและรับฟังปัญหา ในรูปแบบ Progressive Web App ที่ติดตั้งลงหน้าจอมือถือได้
-ออกแบบให้ **ข้อมูลบทสนทนาอยู่ในเครื่องผู้ใช้เท่านั้น** เซิร์ฟเวอร์ทำหน้าที่แค่ส่งต่อข้อความไปยัง AI และนับโควตา ไม่มีฐานข้อมูลเก็บแชท ไม่มีโฆษณา
+<h1 align="center">Soulom (โซลอม)</h1>
+
+<p align="center">
+  <b>เพื่อนคุย AI ตอนกลางคืน ที่ฟังจริง ไม่ตัดสิน</b><br />
+  A Thai-first AI companion for lonely or sleepless nights
+</p>
+
+<p align="center">
+  <a href="https://soulom.pages.dev"><b>▶ เปิดใช้งานเลย / Try it: soulom.pages.dev</b></a>
+  <!-- LAUNCH-LINKS: add itch.io / Product Hunt links here after posting -->
+</p>
+
+<p align="center">
+  <img src="docs/launch/ph-1-chat-th.png" width="820" alt="Soulom chat screenshot" />
+</p>
+
+## Soulom คืออะไร
+
+**หมวด:** แอปเพื่อนคุย / รับฟัง (AI Companion) · สุขภาวะทางใจ (Wellbeing) · เว็บแอปติดตั้งลงมือถือได้ (PWA)
+
+Soulom เป็นเพื่อนคุยที่พร้อมฟังตอนที่เหงา เครียด หรือนอนไม่หลับ ไม่ได้มาสอน ไม่ได้มาแก้ปัญหาให้ แค่ฟัง ถามต่อ และจำเรื่องที่คุณเคยเล่าไว้
+
+| | |
+| --- | --- |
+| 💬 **คุยได้ทันที** | เปิดเว็บแล้วพิมพ์เลย ไม่ต้องสมัคร ไม่ต้องล็อกอิน |
+| 🎭 **3 บุคลิก** | เพื่อนสนิท · พี่ใจดี · ผู้ฟังสุภาพ เปลี่ยนได้ทุกเมื่อ |
+| 🧠 **จำเรื่องที่เล่า** | สรุปเรื่องสำคัญเป็นโน้ตความจำสั้นๆ ในเครื่องคุณ |
+| 🔒 **แชทอยู่ในเครื่องคุณ** | ไม่มีฐานข้อมูลเก็บแชท สำรอง/ย้ายเครื่องด้วยไฟล์ `.soulom` (ตั้งรหัสผ่านได้) |
+| 📱 **ติดตั้งเหมือนแอป** | กด "เพิ่มลงหน้าจอหลัก" ได้ทั้ง Android และ iPhone |
+| 🌏 **ไทย / English** | สลับภาษาได้ที่ปุ่มบนหัวแอป |
+| ☎ **ปลอดภัยไว้ก่อน** | ถ้ามีสัญญาณเสี่ยง จะแนะนำสายด่วน 1323 / 1669 เสมอ |
+
+**ยังทำไม่ได้:** ค้นอินเทอร์เน็ต (ข้อเท็จจริงอาจผิดได้) ดูรูป/ฟังเสียง และไม่ใช่นักบำบัดหรือแพทย์
+
+## What is Soulom? (English)
+
+Soulom is a free, Thai-first AI listening companion that runs in your browser and installs like an app.
+It listens without judging, asks gentle follow-up questions and remembers what you shared, with three
+personalities to choose from. There's no account and no ads, and your chats are stored only on your device.
+It isn't therapy: if someone seems at risk, it always points to Thailand's 1323 / 1669 hotlines.
+
+**Built with:** React · Vite · TypeScript · Tailwind CSS · Cloudflare Pages Functions · Google Gemini
+
+---
+
+> ส่วนด้านล่างสำหรับนักพัฒนา (Developer docs)
 
 ## สถาปัตยกรรม
 
