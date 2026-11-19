@@ -31,6 +31,8 @@ export interface GeminiGenerationOptions {
   temperature: number;
   maxOutputTokens: number;
   models?: string[];
+  /** Lets the model run Google Search when it needs real-world facts (titles, news, release dates). */
+  allowWebSearch?: boolean;
 }
 
 export class GeminiRequestError extends Error {
@@ -70,7 +72,8 @@ export function prepareTurnsForGemini(turns: ConversationTurn[]): ConversationTu
 }
 
 export async function generateGeminiReply(options: GeminiGenerationOptions): Promise<string> {
-  const body = JSON.stringify({
+  const buildBody = (withSearch: boolean) => JSON.stringify({
+    ...(withSearch ? { tools: [{ google_search: {} }] } : {}),
     systemInstruction: { parts: [{ text: options.systemInstruction }] },
     contents: options.turns.map((turn) => ({ role: turn.role, parts: [{ text: turn.text }] })),
     generationConfig: {
@@ -80,22 +83,32 @@ export async function generateGeminiReply(options: GeminiGenerationOptions): Pro
       thinkingConfig: { thinkingLevel: "minimal" },
     },
   });
+  const plainBody = buildBody(false);
+  const searchBody = options.allowWebSearch ? buildBody(true) : null;
 
   const models = options.models && options.models.length > 0 ? options.models : DEFAULT_GEMINI_MODELS;
   let lastError: GeminiRequestError | undefined;
 
+  const post = (model: string, body: string) =>
+    fetch(endpointFor(model), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-goog-api-key": options.apiKey,
+      },
+      body,
+      signal: AbortSignal.timeout(ATTEMPT_TIMEOUT_MS),
+    });
+
   for (const model of models) {
     let response: Response;
     try {
-      response = await fetch(endpointFor(model), {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-goog-api-key": options.apiKey,
-        },
-        body,
-        signal: AbortSignal.timeout(ATTEMPT_TIMEOUT_MS),
-      });
+      response = await post(model, searchBody ?? plainBody);
+      // Search is a bonus: if this model or key rejects the tool (or search quota is used up), answer without it.
+      if (searchBody && !response.ok && (response.status === 400 || response.status === 403 || response.status === 429)) {
+        console.warn("gemini_search_unavailable", model, response.status);
+        response = await post(model, plainBody);
+      }
     } catch {
       lastError = new GeminiRequestError(`Gemini ${model} timed out or failed`, "upstream");
       continue;

@@ -121,6 +121,7 @@ function buildGeneration(chatRequest: ChatRequest) {
     ),
     turns: chatRequest.turns,
     temperature: chatRequest.mode === "nudge" ? 0.9 : 0.85,
+    allowWebSearch: chatRequest.mode === "chat",
     maxOutputTokens: chatRequest.mode === "nudge" ? 256 : 1024,
   };
 }
