@@ -1,6 +1,8 @@
 export interface SoulomEnv {
   GEMINI_API_KEY?: string;
   GEMINI_MODEL?: string;
+  /** "true" turns on Google Search grounding for chat. Needs a billed Gemini project (free keys get 429). */
+  ENABLE_WEB_SEARCH?: string;
   SOULOM_KV?: KVNamespace;
   FREE_DAILY_MESSAGE_LIMIT?: string;
   LEMON_SQUEEZY_API_KEY?: string;

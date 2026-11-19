@@ -103,7 +103,7 @@ function quotaFor(mode: ChatMode, env: SoulomEnv): { scope: QuotaScope; limit: n
   return { scope: "memory-note", limit: FREE_DAILY_MEMORY_NOTES };
 }
 
-function buildGeneration(chatRequest: ChatRequest) {
+function buildGeneration(chatRequest: ChatRequest, env: SoulomEnv) {
   if (chatRequest.mode === "memory-note") {
     return {
       ...buildMemoryNoteRequest(chatRequest.memoryNote, chatRequest.turns),
@@ -121,7 +121,7 @@ function buildGeneration(chatRequest: ChatRequest) {
     ),
     turns: chatRequest.turns,
     temperature: chatRequest.mode === "nudge" ? 0.9 : 0.85,
-    allowWebSearch: chatRequest.mode === "chat",
+    allowWebSearch: chatRequest.mode === "chat" && env.ENABLE_WEB_SEARCH?.trim() === "true",
     maxOutputTokens: chatRequest.mode === "nudge" ? 256 : 1024,
   };
 }
@@ -159,7 +159,7 @@ export const onRequestPost: PagesFunction<SoulomEnv> = async ({ request, env }) 
     reply = await generateGeminiReply({
       apiKey: env.GEMINI_API_KEY.trim(), // trim() also strips a stray BOM (U+FEFF)
       models: resolveGeminiModels(env.GEMINI_MODEL),
-      ...buildGeneration(chatRequest),
+      ...buildGeneration(chatRequest, env),
     });
   } catch (error) {
     // Logs only the model name and status, never conversation text.
